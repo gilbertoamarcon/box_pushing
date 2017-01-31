@@ -1,0 +1,72 @@
+clear all;
+close all;
+clc;
+
+MAP_FILE    = 'Files/map.csv';
+PLAN_FILE   = 'Files/plan.csv';
+FIG_PREFIX	= 'Figs/FIG';
+FIG_PATTERN	= '%s%03d.png';
+
+BLOCK_SIZE  = 1000;
+
+% Map loading
+map = fliplr(csvread(MAP_FILE));
+
+% Plan execution loading
+file = fileread(PLAN_FILE);
+data = strread(file,'%s','delimiter','\n');
+num_steps = length(data);
+
+% Parsing plan history positions
+for i =1:num_steps
+
+    % Parsing data
+    set = strread(data{i},'%s','delimiter',':');
+
+    % Robot positions
+    pos = regexp(set{1}, '\d+,\d+,','match');
+    for j =1:length(pos)
+        robot(:,i,j) = strread(pos{j},'%d','delimiter',',')';
+    end
+
+    % Box positions
+    pos = regexp(set{2}, '\d+,\d+,','match');
+    for j =1:length(pos)
+        box(:,i,j) = strread(pos{j},'%d','delimiter',',')';
+    end
+end
+
+% Generating image sequences
+for s=1:num_steps
+    
+    % Map
+    hold all;
+    colormap([1 1 1; 0 0 0 ]);
+    image(map .* 255);
+
+    % Plotting box positions
+    for i =1:size(box,3)
+        y = box(1,s,i)'+1;
+        x = box(2,s,i)'+1;
+        scatter(x,y,BLOCK_SIZE,'sr','filled');
+        text(x,y,char(i+47),'Color','w','FontSize',14,'HorizontalAlignment','center');
+    end
+
+    % Plotting robot positions
+    for i =1:size(robot,3)
+        y = robot(1,s,i)'+1;
+        x = robot(2,s,i)'+1;
+        scatter(x,y,BLOCK_SIZE,'sb','filled');
+        text(x,y,char(i+64),'Color','w','FontSize',14,'HorizontalAlignment','center');
+    end
+
+    axis square;
+    axis tight;
+    drawnow;
+    
+    % Saving to file
+    filename = sprintf(FIG_PATTERN,FIG_PREFIX,s);
+    hgexport(gcf,filename,hgexport('factorystyle'), 'Format', 'png'); 
+
+end
+

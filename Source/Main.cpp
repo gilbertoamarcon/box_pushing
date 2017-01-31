@@ -10,6 +10,7 @@
 // File names
 #define PROBLEM		"Files/problem.csv"
 #define MAP_FILE	"Files/map.csv"
+#define PLAN_FILE	"Files/plan.csv"
 
 // State display
 void display(State *state, Map *map, State *goal=NULL);
@@ -22,6 +23,9 @@ void clear_list(list<State*> *state_list,State* start, State* goal);
 
 // Print plan
 void print_plan(stack<State> plan, State* goal, Map *map);
+
+// Store plan execution history
+void store_plan(char *filename, stack<State> plan);
 
 // Compare two vectors
 bool vector_equal(vector<Pos> veca, vector<Pos> vecb);
@@ -75,6 +79,7 @@ int main(int argc, char **argv){
 		printf("Plan: \n");
 		print_plan(plan,goal,map);
 		printf("\n");
+		store_plan(PLAN_FILE,plan);
 	}
 	else
 		printf("Plan failed.\n");
@@ -181,6 +186,39 @@ void print_plan(stack<State> plan, State* goal, Map *map){
 		display(&plan.top(),map,goal);
 		plan.pop();
 	}
+}
+
+// Store plan execution history
+void store_plan(char *filename, stack<State> plan){
+
+	// Checking if origin file exists
+	FILE *file  = fopen(filename,"w");
+	if(file == NULL){
+		printf("Error: Origin file '%s' not found.\n",filename);
+		return;
+	}
+
+	while(!plan.empty()){
+
+		// Boxes positions
+		for(Pos pos : plan.top().boxes)
+			fprintf(file, "%d,%d,",pos.i,pos.j);
+		fprintf(file, ":");
+
+
+		// Robots positions
+		for(Pos pos : plan.top().robots)
+			fprintf(file, "%d,%d,",pos.i,pos.j);
+		fprintf(file, "\n");
+
+		plan.pop();
+	}
+
+	// Done
+	fclose(file);
+	printf("File '%s' stored.\n",filename);
+
+	return;
 }
 
 // Check if two stacks are equal
