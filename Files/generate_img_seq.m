@@ -6,8 +6,10 @@ MAP_FILE    = 'Files/map.csv';
 PLAN_FILE   = 'Files/plan.csv';
 FIG_PREFIX	= 'Figs/FIG';
 FIG_PATTERN	= '%s%03d.png';
+GOAL_APHA   = 0.20;
+DISP_PATH   = 1;
 
-BLOCK_SIZE  = 1000;
+BLOCK_SIZE  = 300;
 
 % Map loading
 map = fliplr(csvread(MAP_FILE));
@@ -24,13 +26,13 @@ for i =1:num_steps
     set = strread(data{i},'%s','delimiter',':');
 
     % Robot positions
-    pos = regexp(set{1}, '\d+,\d+,','match');
+    pos = regexp(set{2}, '\d+,\d+,','match');
     for j =1:length(pos)
         robot(:,i,j) = strread(pos{j},'%d','delimiter',',')';
     end
 
     % Box positions
-    pos = regexp(set{2}, '\d+,\d+,','match');
+    pos = regexp(set{1}, '\d+,\d+,','match');
     for j =1:length(pos)
         box(:,i,j) = strread(pos{j},'%d','delimiter',',')';
     end
@@ -44,23 +46,41 @@ for s=1:num_steps
     colormap([1 1 1; 0 0 0 ]);
     image(map .* 255);
 
+    % Plotting robot path
+    if DISP_PATH
+        for i =1:size(robot,3)
+            py = robot(1,1:s,i)'+1;
+            px = robot(2,1:s,i)'+1;
+            plot(px,py,'r');
+        end
+    end
+
+    % Plotting goal box positions
+    for i =1:size(box,3)
+        y = box(1,num_steps,i)'+1;
+        x = box(2,num_steps,i)'+1;
+        scatter(x,y,BLOCK_SIZE,'sw','filled');
+        scatter(x,y,BLOCK_SIZE,'sb','filled','MarkerFaceAlpha',GOAL_APHA);
+        text(x,y,char(i+64),'Color','w','FontSize',14,'HorizontalAlignment','center');
+    end
+
     % Plotting box positions
     for i =1:size(box,3)
         y = box(1,s,i)'+1;
         x = box(2,s,i)'+1;
-        scatter(x,y,BLOCK_SIZE,'sr','filled');
-        text(x,y,char(i+47),'Color','w','FontSize',14,'HorizontalAlignment','center');
+        scatter(x,y,BLOCK_SIZE,'sb','filled');
+        text(x,y,char(i+64),'Color','w','FontSize',14,'HorizontalAlignment','center');
     end
 
     % Plotting robot positions
     for i =1:size(robot,3)
         y = robot(1,s,i)'+1;
         x = robot(2,s,i)'+1;
-        scatter(x,y,BLOCK_SIZE,'sb','filled');
-        text(x,y,char(i+64),'Color','w','FontSize',14,'HorizontalAlignment','center');
+        scatter(x,y,BLOCK_SIZE,'sr','filled');
+        text(x,y,char(i+47),'Color','w','FontSize',14,'HorizontalAlignment','center');
     end
 
-    axis square;
+    axis equal;
     axis tight;
     drawnow;
     
