@@ -5,10 +5,11 @@
 #include <iostream>
 #include <string>
 #include <ctime>
-#include "state.hpp"
+#include "State.hpp"
 
-#define PROBLEM		"problem.csv"
-#define MAP_FILE	"map.csv"
+// File names
+#define PROBLEM		"Files/problem.csv"
+#define MAP_FILE	"Files/map.csv"
 
 // State display
 void display(State *state, Map *map, State *goal=NULL);

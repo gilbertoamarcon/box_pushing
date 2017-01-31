@@ -1,4 +1,4 @@
-#include "state.hpp"
+#include "State.hpp"
 
 // Manhattan distance between a and b
 int manhattan(Pos a, Pos b){
