@@ -41,19 +41,19 @@ State::State(State *parent,string action_vector){
 	this->g += robots.size();
 }
 
-State::State(char *robots_str, char *boxes_str){
+State::State(char *boxes_str,char *robots_str){
 
 	this->parent = NULL;
 	this->g = 0;
 	this->f = 0;
 
-	// Parsing robot positions
-	if(robots_str != NULL)
-		parse_pos(robots_str,&robots);
-
 	// Parsing box positions
 	if(boxes_str != NULL)
 		parse_pos(boxes_str,&boxes);
+
+	// Parsing robot positions
+	if(robots_str != NULL)
+		parse_pos(robots_str,&robots);
 
 	// Initializing action vector with no action
 	for(Pos robot : this->robots)

@@ -56,7 +56,7 @@ class State{
 		State(State *parent,string action_vector);
 
 		// Constructor from string descriptor
-		State(char *robots_str, char *boxes_str);
+		State(char *boxes_str, char *robots_str=NULL);
 
 		// Return stack with children states
 		void expand(stack<State*> *children, Map *map);

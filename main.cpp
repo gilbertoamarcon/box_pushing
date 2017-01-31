@@ -7,12 +7,11 @@
 #include <ctime>
 #include "state.hpp"
 
+#define PROBLEM		"problem.csv"
 #define MAP_FILE	"map.csv"
-#define NMAX		10000
-#define EPSILON		1
 
 // State display
-void display(State *state, State *goal, Map *map);
+void display(State *state, Map *map, State *goal=NULL);
 
 // World display
 void display_world(State *state, State *goal, Map *map);
@@ -33,28 +32,37 @@ bool state_equal(State *sta, State *stb, bool robot_pos);
 int heuristic(State *node, State *goal);
 
 // Insert child to open list if correct conditions met
-void new_child(State *child, list<State*> *open, list<State*> *closed, State *goal, int beamsize);
+void new_child(State *child, list<State*> *open, list<State*> *closed, State *goal, int beamsize, float epsilon);
 
 // Search for a plan
-int search(State *start, State *goal, Map *map, stack<State> *plan, int beamsize);
+int search(State *start, State *goal, Map *map, stack<State> *plan, int max_exp, int beamsize, float epsilon);
+
+// Loading problem from file
+void load_problem(char *filename, State **start, State **goal, int *max_exp, int *beamsize, float *epsilon);
 
 int main(int argc, char **argv){
 
+	State *start	= NULL;
+	State *goal		= NULL;
+	int max_exp		= 0;
+	int beamsize	= 0;
+	float epsilon	= 0;
+
+	load_problem(PROBLEM, &start, &goal, &max_exp, &beamsize, &epsilon);
+	printf("Parameters loaded: max_exp: %d, beamsize: %d, epsilon: %f\n",max_exp, beamsize, epsilon);
+
 	Map *map = new Map(MAP_FILE);
 
-	State *start	= new State("7,1,7,7","6,2,6,6");
-	State *goal		= new State(NULL,"7,3,7,7");	
-
 	printf("Start: ");
-	display(start,NULL,map);
+	display(start,map);
 
 	printf("Goal: ");
-	display(goal,NULL,map);
+	display(goal,map);
 
 	// Running and taking execution time
 	stack<State> plan;
 	clock_t t_start = clock();
-	int num_exp_nodes = search(start, goal, map, &plan, NMAX);
+	int num_exp_nodes = search(start, goal, map, &plan, max_exp, beamsize, epsilon);
 	double planning_time = (double)(clock() - t_start)/(double)CLOCKS_PER_SEC;
 
 	// Presenting results on screen
@@ -74,13 +82,52 @@ int main(int argc, char **argv){
 
 }
 
+// Loading problem from file
+void load_problem(char *filename, State **start, State **goal, int *max_exp, int *beamsize, float *epsilon){
+
+	// Checking if origin file exists
+	FILE *file  = fopen(filename,"r");
+	if(file == NULL){
+		printf("Error: Origin file '%s' not found.\n",filename);
+		return;
+	}
+	
+	// Getting problem conditions
+	char init_robot[BUFFER_SIZE];
+	char init_boxes[BUFFER_SIZE];
+	char final_boxes[BUFFER_SIZE];
+	fgets(init_robot,BUFFER_SIZE,file);
+	fgets(init_boxes,BUFFER_SIZE,file);
+	fgets(final_boxes,BUFFER_SIZE,file);
+
+	// Getting paramters
+	char param_buffer[BUFFER_SIZE];
+	fgets(param_buffer,BUFFER_SIZE,file);
+	int i = 0;
+	*max_exp = atoi(param_buffer);
+	while(param_buffer[i] != ',') i++; i++;
+	*beamsize = atoi(param_buffer+i);
+	while(param_buffer[i] != ',') i++; i++;
+	*epsilon = atof(param_buffer+i);
+
+	// Initializing start and goal states
+	*start	= new State(init_boxes,init_robot);
+	*goal	= new State(final_boxes);
+
+	// Done
+	fclose(file);
+	printf("File '%s' loaded.\n",filename);
+
+	return;
+}
+
 // State display
-void display(State *state, State *goal, Map *map){
+void display(State *state, Map *map, State *goal){
 	printf("%s ",state->action_vector.c_str());
-	for(Pos pos : state->robots)
+	for(Pos pos : state->boxes)
 		printf("(%d,%d)",pos.i,pos.j);
 	printf(" : ");
-	for(Pos pos : state->boxes)
+	for(Pos pos : state->robots)
 		printf("(%d,%d)",pos.i,pos.j);
 	printf("\n");
 	display_world(state,goal,map);
@@ -130,7 +177,7 @@ void print_plan(stack<State> plan, State* goal, Map *map){
 	int i = 0;
 	while(!plan.empty()){
 		printf("%3d: ",i++);
-		display(&plan.top(),goal,map);
+		display(&plan.top(),map,goal);
 		plan.pop();
 	}
 }
@@ -165,7 +212,7 @@ int heuristic(State *node, State *goal){
 }
 
 // Insert child to open list if correct conditions met
-void new_child(State *child, list<State*> *open, list<State*> *closed, State *goal, int beamsize){
+void new_child(State *child, list<State*> *open, list<State*> *closed, State *goal, int beamsize, float epsilon){
 
 	// Check if in the closed list
 	for(State* node : *closed)
@@ -190,7 +237,7 @@ void new_child(State *child, list<State*> *open, list<State*> *closed, State *go
 	int h = heuristic(child,goal);
 
 	// Computing the estimated path cost
-	child->f = child->g + EPSILON*h;
+	child->f = child->g + epsilon*h;
 
 	// Inserting child into the sorted open list
 	list<State*>::iterator it = open->begin();
@@ -205,7 +252,7 @@ void new_child(State *child, list<State*> *open, list<State*> *closed, State *go
 }
 
 // Search for a plan
-int search(State *start, State *goal, Map *map, stack<State> *plan, int beamsize){
+int search(State *start, State *goal, Map *map, stack<State> *plan, int max_exp, int beamsize, float epsilon){
 
 	stack<State*> children;
 	list<State*> open;
@@ -221,7 +268,7 @@ int search(State *start, State *goal, Map *map, stack<State> *plan, int beamsize
 	for(;;){
 
 		// Checking if failure
-		if(num_exp_nodes++ == NMAX || open.empty()) return -1;
+		if(num_exp_nodes++ == max_exp || open.empty()) return -1;
 
 		// Visiting current node (least cost)
 		state = open.front();
@@ -236,7 +283,7 @@ int search(State *start, State *goal, Map *map, stack<State> *plan, int beamsize
 		// Expanding current node
 		state->expand(&children,map);
 		while(!children.empty()){
-			new_child(children.top(),&open,&closed,goal,beamsize);
+			new_child(children.top(),&open,&closed,goal,beamsize,epsilon);
 			children.pop();
 		}
 	}
