@@ -8,10 +8,9 @@
 #include "state.hpp"
 
 #define NMAX		10000
-#define HEURISTIC	1
+#define EPSILON		2
 #define M			10
 #define N			10
-// #define ROB_POS		0
 
 // State display
 void display(State *state, State *goal);
@@ -31,23 +30,19 @@ bool vector_equal(vector<Pos> veca, vector<Pos> vecb);
 // Compare two states
 bool state_equal(State *sta, State *stb, bool robot_pos);
 
-/*// Heuristic0
-int heuristic0(State *node, State *goal);
-
-// Heuristic1
-int heuristic1(State *node, State *goal);*/
+// Heuristic
+int heuristic(State *node, State *goal);
 
 // Insert child to open list if correct conditions met
-void new_child(State *child, list<State*> *open, list<State*> *closed, State *goal, int beamsize, bool heuristic);
+void new_child(State *child, list<State*> *open, list<State*> *closed, State *goal, int beamsize);
 
 // Search for a plan
-int search(State *start, State *goal, stack<State> *plan, int beamsize, bool heuristic);
-
+int search(State *start, State *goal, stack<State> *plan, int beamsize);
 
 int main(int argc, char **argv){
 
-	State *start	= new State("1,0;1,1");
-	State *goal		= new State("0,0;0,0");	
+	State *start	= new State("0,0,0,1","1,1,2,1,5,5");
+	State *goal		= new State(NULL,"3,3,2,2,5,5");	
 
 	printf("Start: ");
 	display(start,NULL);
@@ -58,7 +53,7 @@ int main(int argc, char **argv){
 	// Running and taking execution time
 	stack<State> plan;
 	clock_t t_start = clock();
-	int num_exp_nodes = search(start, goal, &plan, NMAX, HEURISTIC);
+	int num_exp_nodes = search(start, goal, &plan, NMAX);
 	double planning_time = (double)(clock() - t_start)/(double)CLOCKS_PER_SEC;
 
 	// Presenting results on screen
@@ -83,7 +78,7 @@ void display(State *state, State *goal){
 	printf("%s ",state->action_vector.c_str());
 	for(Pos pos : state->robots)
 		printf("(%d,%d)",pos.i,pos.j);
-	printf("; ");
+	printf(" : ");
 	for(Pos pos : state->boxes)
 		printf("(%d,%d)",pos.i,pos.j);
 	printf("\n");
@@ -97,7 +92,7 @@ void display_world(State *state, State *goal){
 		printf("===");
 	printf("==");
 	printf("\n");
-	for(int i = 0; i < M; i++){
+	for(int i = M-1; i >= 0; i--){
 		printf("|");
 		for(int j = 0; j < N; j++){
 			int element = ' ';
@@ -126,7 +121,6 @@ void display_world(State *state, State *goal){
 	printf("==");
 	printf("\n");
 }
-
 
 // Clear list
 void clear_list(list<State*> *state_list,State* start, State* goal){
@@ -161,32 +155,23 @@ bool state_equal(State *sta, State *stb, bool robot_pos){
 	return true;
 }
 
-/*// Heuristic 0
-int heuristic0(State *node, State *goal){
-	stack<int> node_stack	= node->A;
-	stack<int> goal_stack	= goal->A;
-	int counter = goal_stack.size() - node_stack.size();
-	return counter;
+// Heuristic
+int heuristic(State *node, State *goal){
+
+	// If number of boxes different, something is wrong
+	if(node->boxes.size() != goal->boxes.size())
+		return 0;
+
+	// Sum of Manhattan distances
+	int h = 0;
+	for(int i = 0; i < node->boxes.size(); i++)
+		h += manhattan(node->boxes.at(i),goal->boxes.at(i));
+
+	return h;
 }
 
-// Heuristic 1
-int heuristic1(State *node, State *goal){
-	stack<int> node_stack	= node->A;
-	stack<int> goal_stack	= goal->A;
-	int counter = goal_stack.size() - node_stack.size();
-	while(goal_stack.size() != node_stack.size())
-		goal_stack.pop();
-	int aux = 0;
-	while(!goal_stack.empty()){
-		counter += 2*abs(node_stack.top() - goal_stack.top());
-		node_stack.pop();
-		goal_stack.pop();
-	}
-	return counter;
-}*/
-
 // Insert child to open list if correct conditions met
-void new_child(State *child, list<State*> *open, list<State*> *closed, State *goal, int beamsize, bool heuristic){
+void new_child(State *child, list<State*> *open, list<State*> *closed, State *goal, int beamsize){
 
 	// Check if in the closed list
 	for(State* node : *closed)
@@ -208,11 +193,10 @@ void new_child(State *child, list<State*> *open, list<State*> *closed, State *go
 		}
 
 	// Computing the heuristic
-	int h = 0;
-	// int h = (heuristic)?heuristic1(child,goal):heuristic0(child,goal);
+	int h = heuristic(child,goal);
 
 	// Computing the estimated path cost
-	child->f = child->g + h;
+	child->f = child->g + EPSILON*h;
 
 	// Inserting child into the sorted open list
 	list<State*>::iterator it = open->begin();
@@ -226,7 +210,8 @@ void new_child(State *child, list<State*> *open, list<State*> *closed, State *go
 
 }
 
-int search(State *start, State *goal, stack<State> *plan, int beamsize, bool heuristic){
+// Search for a plan
+int search(State *start, State *goal, stack<State> *plan, int beamsize){
 
 	stack<State*> children;
 	list<State*> open;
@@ -256,9 +241,8 @@ int search(State *start, State *goal, stack<State> *plan, int beamsize, bool heu
 
 		// Expanding current node
 		state->expand(&children,M,N);
-
 		while(!children.empty()){
-			new_child(children.top(),&open,&closed,goal,beamsize,heuristic);
+			new_child(children.top(),&open,&closed,goal,beamsize);
 			children.pop();
 		}
 	}

@@ -1,8 +1,28 @@
 #include "state.hpp"
 
+// Manhattan distance between a and b
+int manhattan(Pos a, Pos b){
+	return abs(a.i - b.i) + abs(a.j - b.j);
+}
 
+// Compares two positions
 bool compare_pos(Pos a, Pos b){
 	return a.i == b.i && a.j == b.j;
+}
+
+// Parsing string into position vector
+void parse_pos(char *str, vector<Pos> *pos){
+	int i = 0;
+	int j = 0;
+	for(;;){
+		i = atoi(str);
+		while(str[0] != ',') str++; str++;
+		j = atoi(str);
+		pos->push_back(Pos(i,j));
+		while(str[0] != ',' && str[0] != '\0') str++;
+		if(str[0] == '\0') return;
+		str++;
+	}
 }
 
 // Constructor from parent
@@ -18,90 +38,44 @@ State::State(State *parent,string action_vector){
 	this->action_vector = action_vector;
 
 	// Cost to reach from goal
-	this->g++;
+	this->g += robots.size();
 }
 
-// Constructor from start/goal
-State::State(char *str){
+State::State(char *robots_str, char *boxes_str){
+
 	this->parent = NULL;
 	this->g = 0;
 	this->f = 0;
 
-	// Parsing state description string
-	int i = 0;
-	int j = 0;
-	for(;;){
-		i = atoi(str);
-		while(str[0] != ',') str++; str++;
-		j = atoi(str);
-		robots.push_back(Pos(i,j));
-		while(str[0] != ',' && str[0] != ';') str++;
-		if(str[0] == ';') break;
-		str++;
-	}
-	str++;
-	for(;;){
-		i = atoi(str);
-		while(str[0] != ',') str++; str++;
-		j = atoi(str);
-		boxes.push_back(Pos(i,j));
-		while(str[0] != ',' && str[0] != '\0') str++;
-		if(str[0] == '\0') break;
-		str++;
-	}
+	// Parsing robot positions
+	if(robots_str != NULL)
+		parse_pos(robots_str,&robots);
 
-	for(Pos robot : robots)
+	// Parsing box positions
+	if(boxes_str != NULL)
+		parse_pos(boxes_str,&boxes);
+
+	// Initializing action vector with no action
+	for(Pos robot : this->robots)
 		action_vector.push_back('N');
 
 }
 
-bool State::validate(int m, int n){
-	vector<Pos> temp_boxes = boxes;
-	for(int i = 0; i < action_vector.size(); i++){
-		switch(action_vector.at(i)){
-			case 'L':
-				robots.at(i).j--;
-				if(robots.at(i).j < 0) return false;
-				for(int j = 0; j < boxes.size(); j++)
-					if(compare_pos(robots.at(i),boxes.at(j)))
-						temp_boxes.at(j).j--;
-				break;
-			case 'U':
-				robots.at(i).i++;
-				if(robots.at(i).i > m-1) return false;
-				for(int j = 0; j < boxes.size(); j++)
-					if(compare_pos(robots.at(i),boxes.at(j)))
-						temp_boxes.at(j).i++;
-				break;
-			case 'R':
-				robots.at(i).j++;
-				if(robots.at(i).j > n-1) return false;
-				for(int j = 0; j < boxes.size(); j++)
-					if(compare_pos(robots.at(i),boxes.at(j)))
-						temp_boxes.at(j).j++;
-				break;
-			case 'D':
-				robots.at(i).i--;
-				if(robots.at(i).i < 0) return false;
-				for(int j = 0; j < boxes.size(); j++)
-					if(compare_pos(robots.at(i),boxes.at(j)))
-						temp_boxes.at(j).i--;
-				break;
-		}
-	}
-	boxes = temp_boxes;
-	for(int i = 0; i < robots.size(); i++){
-		for(int j = 0; j < i; j++)
-			if(compare_pos(robots.at(i),robots.at(j))) return false;
-		for(Pos box : boxes)
-			if(compare_pos(robots.at(i),box)) return false;
-	}
-	return true;
+// Return stack with all valid children states
+void State::expand(stack<State*> *children,int m, int n){
+	string action_vector;
+	expand_action_vector(action_vector,robots.size(),NULL,children,m,n);
 }
 
+// Recursive action vector expansion
 void State::expand_action_vector(string action_vector, int r, char action, stack<State*> *children,int m, int n){
-	action_vector.push_back(action);
-	if(--r == 0) {
+
+	// Adding action to action vector if not root node
+	if(action != NULL)
+		action_vector.push_back(action);
+
+	// Leaf node, create and validate children 
+	if(r-- == 0){
 		State *child = new State(this,action_vector);
 		if(child->validate(m,n))
 			children->push(child);
@@ -109,6 +83,8 @@ void State::expand_action_vector(string action_vector, int r, char action, stack
 			delete child;
 		return;
 	}
+
+	// Recursive expansion
 	expand_action_vector(action_vector,r,'N',children,m,n);
 	expand_action_vector(action_vector,r,'L',children,m,n);
 	expand_action_vector(action_vector,r,'U',children,m,n);
@@ -116,15 +92,108 @@ void State::expand_action_vector(string action_vector, int r, char action, stack
 	expand_action_vector(action_vector,r,'D',children,m,n);
 }
 
+// Validate state against world rules
+bool State::validate(int m, int n){
 
-// Return stack with children states
-void State::expand(stack<State*> *children,int m, int n){
-	int r = robots.size();
-	string action_vector;
-	expand_action_vector(action_vector,r,'N',children,m,n);
-	expand_action_vector(action_vector,r,'L',children,m,n);
-	expand_action_vector(action_vector,r,'U',children,m,n);
-	expand_action_vector(action_vector,r,'R',children,m,n);
-	expand_action_vector(action_vector,r,'D',children,m,n);
+	vector<Pos> temp_boxes = boxes;
+
+	// Displacing robots and moving boxes
+	for(int i = 0; i < action_vector.size(); i++){
+
+		// Displacing robot and moving boxes
+		switch(action_vector.at(i)){
+
+			// Moving left
+			case 'L':
+
+				// Robot displacement
+				robots.at(i).j--;
+
+				// Robot bounds checking
+				if(robots.at(i).j < 0) return false;
+
+				// Box displacement
+				for(int j = 0; j < boxes.size(); j++)
+					if(compare_pos(robots.at(i),boxes.at(j))){
+						temp_boxes.at(j).j--;
+						break;
+					}
+
+				break;
+
+			// Moving up
+			case 'U':
+
+				// Robot displacement
+				robots.at(i).i++;
+
+				// Robot bounds checking
+				if(robots.at(i).i > m-1) return false;
+
+				// Box displacement
+				for(int j = 0; j < boxes.size(); j++)
+					if(compare_pos(robots.at(i),boxes.at(j))){
+						temp_boxes.at(j).i++;
+						break;
+					}
+
+				break;
+
+			// Moving right
+			case 'R':
+
+				// Robot displacement
+				robots.at(i).j++;
+
+				// Robot bounds checking
+				if(robots.at(i).j > n-1) return false;
+				
+				// Box displacement
+				for(int j = 0; j < boxes.size(); j++)
+					if(compare_pos(robots.at(i),boxes.at(j))){
+						temp_boxes.at(j).j++;
+						break;
+					}
+
+				break;
+
+			// Moving down
+			case 'D':
+
+				// Robot displacement
+				robots.at(i).i--;
+
+				// Robot bounds checking
+				if(robots.at(i).i < 0) return false;
+				
+				// Box displacement
+				for(int j = 0; j < boxes.size(); j++)
+					if(compare_pos(robots.at(i),boxes.at(j))){
+						temp_boxes.at(j).i--;
+						break;
+					}
+
+				break;
+		}
+	}
+	
+	// Updating box states
+	boxes = temp_boxes;
+
+	// Checking collisions
+	for(int i = 0; i < robots.size(); i++){
+		
+		// Checking robot-robot collisions
+		for(int j = 0; j < i; j++)
+			if(compare_pos(robots.at(i),robots.at(j))) return false;
+		
+		// Checking robot-box collisions
+		for(Pos box : boxes)
+			if(compare_pos(robots.at(i),box)) return false;
+
+	}
+
+	// State is valid
+	return true;
 }
 
