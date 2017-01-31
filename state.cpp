@@ -62,13 +62,13 @@ State::State(char *robots_str, char *boxes_str){
 }
 
 // Return stack with all valid children states
-void State::expand(stack<State*> *children,int m, int n){
+void State::expand(stack<State*> *children, Map *map){
 	string action_vector;
-	expand_action_vector(action_vector,robots.size(),NULL,children,m,n);
+	expand_action_vector(action_vector,robots.size(),NULL,children,map);
 }
 
 // Recursive action vector expansion
-void State::expand_action_vector(string action_vector, int r, char action, stack<State*> *children,int m, int n){
+void State::expand_action_vector(string action_vector, int r, char action, stack<State*> *children, Map *map){
 
 	// Adding action to action vector if not root node
 	if(action != NULL)
@@ -77,7 +77,7 @@ void State::expand_action_vector(string action_vector, int r, char action, stack
 	// Leaf node, create and validate children 
 	if(r-- == 0){
 		State *child = new State(this,action_vector);
-		if(child->validate(m,n))
+		if(child->validate(map))
 			children->push(child);
 		else
 			delete child;
@@ -85,15 +85,15 @@ void State::expand_action_vector(string action_vector, int r, char action, stack
 	}
 
 	// Recursive expansion
-	expand_action_vector(action_vector,r,'N',children,m,n);
-	expand_action_vector(action_vector,r,'L',children,m,n);
-	expand_action_vector(action_vector,r,'U',children,m,n);
-	expand_action_vector(action_vector,r,'R',children,m,n);
-	expand_action_vector(action_vector,r,'D',children,m,n);
+	expand_action_vector(action_vector,r,'N',children,map);
+	expand_action_vector(action_vector,r,'L',children,map);
+	expand_action_vector(action_vector,r,'U',children,map);
+	expand_action_vector(action_vector,r,'R',children,map);
+	expand_action_vector(action_vector,r,'D',children,map);
 }
 
 // Validate state against world rules
-bool State::validate(int m, int n){
+bool State::validate(Map *map){
 
 	vector<Pos> temp_boxes = boxes;
 
@@ -115,7 +115,13 @@ bool State::validate(int m, int n){
 				// Box displacement
 				for(int j = 0; j < boxes.size(); j++)
 					if(compare_pos(robots.at(i),boxes.at(j))){
+
+						// Box displacing
 						temp_boxes.at(j).j--;
+
+						// Box-wall collision checking
+						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+
 						break;
 					}
 
@@ -128,12 +134,18 @@ bool State::validate(int m, int n){
 				robots.at(i).i++;
 
 				// Robot bounds checking
-				if(robots.at(i).i > m-1) return false;
+				if(robots.at(i).i > map->rows-1) return false;
 
 				// Box displacement
 				for(int j = 0; j < boxes.size(); j++)
 					if(compare_pos(robots.at(i),boxes.at(j))){
+
+						// Box displacing
 						temp_boxes.at(j).i++;
+
+						// Box-wall collision checking
+						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+
 						break;
 					}
 
@@ -146,12 +158,18 @@ bool State::validate(int m, int n){
 				robots.at(i).j++;
 
 				// Robot bounds checking
-				if(robots.at(i).j > n-1) return false;
+				if(robots.at(i).j > map->cols-1) return false;
 				
 				// Box displacement
 				for(int j = 0; j < boxes.size(); j++)
 					if(compare_pos(robots.at(i),boxes.at(j))){
+
+						// Box displacing
 						temp_boxes.at(j).j++;
+
+						// Box-wall collision checking
+						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+
 						break;
 					}
 
@@ -169,12 +187,21 @@ bool State::validate(int m, int n){
 				// Box displacement
 				for(int j = 0; j < boxes.size(); j++)
 					if(compare_pos(robots.at(i),boxes.at(j))){
+
+						// Box displacing
 						temp_boxes.at(j).i--;
+
+						// Box-wall collision checking
+						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+
 						break;
 					}
 
 				break;
 		}
+
+		// Robot-wall collision checking
+		if(map->get_value(robots.at(i).i,robots.at(i).j)) return false;
 	}
 	
 	// Updating box states

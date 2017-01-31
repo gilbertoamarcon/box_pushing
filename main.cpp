@@ -7,22 +7,21 @@
 #include <ctime>
 #include "state.hpp"
 
+#define MAP_FILE	"map.csv"
 #define NMAX		10000
-#define EPSILON		2
-#define M			10
-#define N			10
+#define EPSILON		1
 
 // State display
-void display(State *state, State *goal);
+void display(State *state, State *goal, Map *map);
 
 // World display
-void display_world(State *state, State *goal);
+void display_world(State *state, State *goal, Map *map);
 
 // Clear list of states from memory
 void clear_list(list<State*> *state_list,State* start, State* goal);
 
 // Print plan
-void print_plan(stack<State> plan, State* goal);
+void print_plan(stack<State> plan, State* goal, Map *map);
 
 // Compare two vectors
 bool vector_equal(vector<Pos> veca, vector<Pos> vecb);
@@ -37,23 +36,25 @@ int heuristic(State *node, State *goal);
 void new_child(State *child, list<State*> *open, list<State*> *closed, State *goal, int beamsize);
 
 // Search for a plan
-int search(State *start, State *goal, stack<State> *plan, int beamsize);
+int search(State *start, State *goal, Map *map, stack<State> *plan, int beamsize);
 
 int main(int argc, char **argv){
 
-	State *start	= new State("0,0,0,1","1,1,2,1,5,5");
-	State *goal		= new State(NULL,"3,3,2,2,5,5");	
+	Map *map = new Map(MAP_FILE);
+
+	State *start	= new State("7,1,7,7","6,2,6,6");
+	State *goal		= new State(NULL,"7,3,7,7");	
 
 	printf("Start: ");
-	display(start,NULL);
+	display(start,NULL,map);
 
 	printf("Goal: ");
-	display(goal,NULL);
+	display(goal,NULL,map);
 
 	// Running and taking execution time
 	stack<State> plan;
 	clock_t t_start = clock();
-	int num_exp_nodes = search(start, goal, &plan, NMAX);
+	int num_exp_nodes = search(start, goal, map, &plan, NMAX);
 	double planning_time = (double)(clock() - t_start)/(double)CLOCKS_PER_SEC;
 
 	// Presenting results on screen
@@ -63,7 +64,7 @@ int main(int argc, char **argv){
 		printf("%d actions.\n",plan.size());
 		printf("%f seconds.\n",planning_time);
 		printf("Plan: \n");
-		print_plan(plan,goal);
+		print_plan(plan,goal,map);
 		printf("\n");
 	}
 	else
@@ -74,7 +75,7 @@ int main(int argc, char **argv){
 }
 
 // State display
-void display(State *state, State *goal){
+void display(State *state, State *goal, Map *map){
 	printf("%s ",state->action_vector.c_str());
 	for(Pos pos : state->robots)
 		printf("(%d,%d)",pos.i,pos.j);
@@ -82,20 +83,16 @@ void display(State *state, State *goal){
 	for(Pos pos : state->boxes)
 		printf("(%d,%d)",pos.i,pos.j);
 	printf("\n");
-	display_world(state,goal);
+	display_world(state,goal,map);
 	printf("\n");
 }
 
 // World display
-void display_world(State *state, State *goal){
-	for(int i = 0; i < M; i++)
-		printf("===");
-	printf("==");
-	printf("\n");
-	for(int i = M-1; i >= 0; i--){
+void display_world(State *state, State *goal, Map *map){
+	for(int i = map->rows-1; i >= 0; i--){
 		printf("|");
-		for(int j = 0; j < N; j++){
-			int element = ' ';
+		for(int j = 0; j < map->cols; j++){
+			int element = (map->get_value(i,j))?'X':' ';
 			if(goal != NULL)
 				for(int k = 0; k < goal->boxes.size(); k++)
 					if(compare_pos(Pos(i,j),goal->boxes.at(k))){
@@ -116,9 +113,6 @@ void display_world(State *state, State *goal){
 		}
 		printf("|\n");
 	}
-	for(int i = 0; i < M; i++)
-		printf("===");
-	printf("==");
 	printf("\n");
 }
 
@@ -132,11 +126,11 @@ void clear_list(list<State*> *state_list,State* start, State* goal){
 }
 
 // Print plan
-void print_plan(stack<State> plan, State* goal){
+void print_plan(stack<State> plan, State* goal, Map *map){
 	int i = 0;
 	while(!plan.empty()){
 		printf("%3d: ",i++);
-		display(&plan.top(),goal);
+		display(&plan.top(),goal,map);
 		plan.pop();
 	}
 }
@@ -211,7 +205,7 @@ void new_child(State *child, list<State*> *open, list<State*> *closed, State *go
 }
 
 // Search for a plan
-int search(State *start, State *goal, stack<State> *plan, int beamsize){
+int search(State *start, State *goal, Map *map, stack<State> *plan, int beamsize){
 
 	stack<State*> children;
 	list<State*> open;
@@ -240,7 +234,7 @@ int search(State *start, State *goal, stack<State> *plan, int beamsize){
 		if(state_equal(state,goal,0)) break;
 
 		// Expanding current node
-		state->expand(&children,M,N);
+		state->expand(&children,map);
 		while(!children.empty()){
 			new_child(children.top(),&open,&closed,goal,beamsize);
 			children.pop();

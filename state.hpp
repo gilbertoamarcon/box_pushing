@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <stack>
+#include "Map.hpp"
 
 using namespace std;
 
@@ -58,13 +59,13 @@ class State{
 		State(char *robots_str, char *boxes_str);
 
 		// Return stack with children states
-		void expand(stack<State*> *children,int m, int n);
+		void expand(stack<State*> *children, Map *map);
 
 		// Recursive action vector expansion
-		void expand_action_vector(string action_vector, int i, char action, stack<State*> *children,int m, int n);
+		void expand_action_vector(string action_vector, int i, char action, stack<State*> *children, Map *map);
 		
 		// Validate state against world rules
-		bool validate(int m, int n);
+		bool validate(Map *map);
 
 };
 
