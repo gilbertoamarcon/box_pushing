@@ -38,10 +38,10 @@ class State{
 		State *parent;
 
 		// Cost to reach from start
-		int g;
+		double g;
 
 		// Estimate path cost
-		int f;
+		double f;
 
 		// Action vector taken from parent
 		string action_vector;

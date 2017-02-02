@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <ctime>
+#include <cmath>
 #include "State.hpp"
 
 // File names
@@ -34,7 +35,7 @@ bool vector_equal(vector<Pos> veca, vector<Pos> vecb);
 bool state_equal(State *sta, State *stb, bool robot_pos);
 
 // Heuristic
-int heuristic(State *node, State *goal);
+double heuristic(State *node, State *goal);
 
 // Insert child to open list if correct conditions met
 void new_child(State *child, list<State*> *open, list<State*> *closed, State *goal, int beamsize, float epsilon);
@@ -236,18 +237,27 @@ bool state_equal(State *sta, State *stb, bool robot_pos){
 }
 
 // Heuristic
-int heuristic(State *node, State *goal){
+double heuristic(State *node, State *goal){
 
 	// If number of boxes different, something is wrong
 	if(node->boxes.size() != goal->boxes.size())
 		return 0;
 
-	// Sum of Manhattan distances
-	int h = 0;
-	for(int i = 0; i < node->boxes.size(); i++)
-		h += manhattan(node->boxes.at(i),goal->boxes.at(i));
+	int max_dist = 0;	// Max Manhattan distance 
+	int sum_dist = 0;	// Sum of all Manhattan distances
+	for(int i = 0; i < node->boxes.size(); i++){
+		int dist = manhattan(node->boxes.at(i),goal->boxes.at(i));
+		sum_dist += dist;
+		if(dist > max_dist)
+			max_dist = dist;
+	}
 
-	return h;
+	// Manhattan distance per robot
+	double dist_per_robot = ceil(((double)sum_dist)/node->robots.size());
+
+	if(dist_per_robot > max_dist)
+		return dist_per_robot;
+	return max_dist;
 }
 
 // Insert child to open list if correct conditions met
@@ -273,7 +283,7 @@ void new_child(State *child, list<State*> *open, list<State*> *closed, State *go
 		}
 
 	// Computing the heuristic
-	int h = heuristic(child,goal);
+	double h = heuristic(child,goal);
 
 	// Computing the estimated path cost
 	child->f = child->g + epsilon*h;

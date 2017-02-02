@@ -38,7 +38,7 @@ State::State(State *parent,string action_vector){
 	this->action_vector = action_vector;
 
 	// Cost to reach from goal
-	this->g += boxes.size();
+	this->g++;
 }
 
 State::State(char *boxes_str,char *robots_str){
