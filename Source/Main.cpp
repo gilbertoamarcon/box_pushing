@@ -14,7 +14,7 @@
 #define PLAN_FILE	"Files/plan.csv"
 
 // State display
-void display(State *state, Map *map, State *goal=NULL);
+void display(State *state, Map *map=NULL, State *goal=NULL);
 
 // World display
 void display_world(State *state, State *goal, Map *map);
@@ -137,6 +137,13 @@ void display(State *state, Map *map, State *goal){
 	for(Pos pos : state->robots)
 		printf("(%d,%d)",pos.i,pos.j);
 	printf("\n");
+
+	if(map == NULL){
+		printf("g: %f\n",state->g);
+		printf("f: %f\n",state->f);
+		return;
+	}
+
 	display_world(state,goal,map);
 	printf("\n");
 }
@@ -322,6 +329,8 @@ int search(State *start, State *goal, Map *map, stack<State> *plan, int max_exp,
 		// Visiting current node (least cost)
 		state = open.front();
 		open.pop_front();
+
+		// display(state);
 
 		// Adding current node to the closed list
 		closed.push_back(state);
