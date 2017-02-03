@@ -6,6 +6,7 @@
 #include <string>
 #include <ctime>
 #include <cmath>
+#include <vector>
 #include "State.hpp"
 
 // File names
@@ -38,7 +39,7 @@ bool state_equal(State *sta, State *stb, bool robot_pos);
 double heuristic(State *node, State *goal);
 
 // Insert child to open list if correct conditions met
-void new_child(State *child, list<State*> *open, list<State*> *closed, State *goal, int beamsize, float epsilon);
+void new_child(State *child, list<State*> *open, vector<State*> *closed, State *goal, int beamsize, float epsilon);
 
 // Search for a plan
 int search(State *start, State *goal, Map *map, stack<State> *plan, int max_exp, int beamsize, float epsilon);
@@ -268,7 +269,7 @@ double heuristic(State *node, State *goal){
 }
 
 // Insert child to open list if correct conditions met
-void new_child(State *child, list<State*> *open, list<State*> *closed, State *goal, int beamsize, float epsilon){
+void new_child(State *child, list<State*> *open, vector<State*> *closed, State *goal, int beamsize, float epsilon){
 
 	// Check if in the closed list
 	for(State* node : *closed)
@@ -298,7 +299,7 @@ void new_child(State *child, list<State*> *open, list<State*> *closed, State *go
 	// Inserting child into the sorted open list
 	list<State*>::iterator it = open->begin();
 	while(it != open->end())
-		if((*(it++))->f > child->f) break;
+		if((*(++it))->f >= child->f) break;
 	open->insert(it,child);
 
 	// Beam search size limit to open list 
@@ -312,7 +313,7 @@ int search(State *start, State *goal, Map *map, stack<State> *plan, int max_exp,
 
 	stack<State*> children;
 	list<State*> open;
-	list<State*> closed;
+	vector<State*> closed;
 
 	State *state = NULL;
 
@@ -364,7 +365,6 @@ int search(State *start, State *goal, Map *map, stack<State> *plan, int max_exp,
 
 	// Clearing memory
 	clear_list(&open,start,goal);
-	clear_list(&closed,start,goal);
 
 	return num_exp_nodes;
 
