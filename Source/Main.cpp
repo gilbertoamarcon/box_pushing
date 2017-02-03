@@ -298,8 +298,8 @@ void new_child(State *child, list<State*> *open, vector<State*> *closed, State *
 
 	// Inserting child into the sorted open list
 	list<State*>::iterator it = open->begin();
-	while(it != open->end())
-		if((*(++it))->f >= child->f) break;
+	for(it = open->begin(); it != open->end(); it++)
+		if((*it)->f >= child->f) break;
 	open->insert(it,child);
 
 	// Beam search size limit to open list 
