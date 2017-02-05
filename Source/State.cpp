@@ -92,15 +92,14 @@ int State::heuristic(State *goal){
 	return max_dist;
 }
 
-// Print state representation on console
+// Write state representation to string
 char* State::sprint(){
-	char buffer[BUFFER_SIZE];
-	sprintf(buffer,"%s ",action_vector.c_str());
-	for(Pos pos : boxes) sprintf(buffer,"%s%s ",buffer,pos.sprint());
-	sprintf(buffer,":");
-	for(Pos pos : robots) sprintf(buffer,"%s%s ",buffer,pos.sprint());
-	sprintf(buffer,"\n");
-	return buffer;
+	strcpy(print_buffer,"");
+	for(Pos pos : boxes) pos.sprint(print_buffer);
+	strcat(print_buffer,":");
+	for(Pos pos : robots) pos.sprint(print_buffer);
+	strcat(print_buffer,"\n");
+	return print_buffer;
 }
 
 // Check if two states are equal

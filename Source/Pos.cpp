@@ -42,8 +42,6 @@ bool Pos::compare(Pos a, Pos b){
 }
 
 // Return string representation of position
-char* Pos::sprint(){
-	char buffer[BUFFER_SIZE];
-	sprintf(buffer,"%d,%d",i,j);
-	return buffer;
+void Pos::sprint(char *buffer){
+	sprintf(buffer,"%s%d,%d,",buffer,i,j);
 }

@@ -43,7 +43,7 @@ class Pos{
 		}
 
 		// Return string representation of position
-		char* sprint();
+		void sprint(char *buffer);
 };
 
 #endif

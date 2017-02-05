@@ -9,9 +9,10 @@
 #include "State.hpp"
 
 // File names
-#define PROBLEM		"Files/problem.csv"
+#define PROB_FILE	"Files/problem.csv"
 #define MAP_FILE	"Files/map.csv"
 #define PLAN_FILE	"Files/plan.csv"
+#define CFG_FILE	"Files/cfg.csv"
 
 // World print
 void display_world(State *state, State *goal, Map *map);
@@ -25,36 +26,38 @@ void print_plan(stack<State> plan, State* goal, Map *map);
 // Store plan execution history
 void store_plan(char *filename, stack<State> plan);
 
+// Loading configuration from file
+void load_cfg(char *filename, int &max_exp, int &beamsize, float &epsilon);
+
+// Loading problem from file
+void load_problem(char *filename, State **start, State **goal);
+
 // Insert child to open list if correct conditions met
 void new_child(State *child, list<State*> *open, vector<State*> *closed, State *goal, int beamsize, float epsilon);
 
 // Search for a plan
-int search(State *start, State *goal, Map *map, stack<State> *plan, int max_exp, int beamsize, float epsilon);
-
-// Loading problem from file
-void load_problem(char *filename, State **start, State **goal, int *max_exp, int *beamsize, float *epsilon);
+int search(State *start, State *goal, Map *map, stack<State> &plan, int max_exp, int beamsize, float epsilon);
 
 int main(int argc, char **argv){
 
-	State *start	= NULL;
-	State *goal		= NULL;
+
+	// Search configuration parameters
 	int max_exp		= 0;
 	int beamsize	= 0;
 	float epsilon	= 0;
+	load_cfg(CFG_FILE, max_exp, beamsize, epsilon);
 
-	load_problem(PROBLEM, &start, &goal, &max_exp, &beamsize, &epsilon);
-	printf("Parameters loaded: max_exp: %d, beamsize: %d, epsilon: %f\n",max_exp, beamsize, epsilon);
+	// Problem parameters
+	State *start	= NULL;
+	State *goal		= NULL;
+	load_problem(PROB_FILE, &start, &goal);
 
 	Map *map = new Map(MAP_FILE);
-
-	printf("Start: %s",start->sprint());
-
-	printf("Goal: %s",goal->sprint());
 
 	// Running and taking execution time
 	stack<State> plan;
 	clock_t t_start = clock();
-	int num_exp_nodes = search(start, goal, map, &plan, max_exp, beamsize, epsilon);
+	int num_exp_nodes = search(start, goal, map, plan, max_exp, beamsize, epsilon);
 	double planning_time = (double)(clock() - t_start)/(double)CLOCKS_PER_SEC;
 
 	// Presenting results on screen
@@ -76,7 +79,34 @@ int main(int argc, char **argv){
 }
 
 // Loading problem from file
-void load_problem(char *filename, State **start, State **goal, int *max_exp, int *beamsize, float *epsilon){
+void load_cfg(char *filename, int &max_exp, int &beamsize, float &epsilon){
+
+	// Checking if origin file exists
+	FILE *file  = fopen(filename,"r");
+	if(file == NULL){
+		printf("Error: Origin file '%s' not found.\n",filename);
+		return;
+	}
+
+	// Getting paramters
+	char param_buffer[BUFFER_SIZE];
+	fgets(param_buffer,BUFFER_SIZE,file);
+	int i = 0;
+	max_exp = atoi(param_buffer);
+	while(param_buffer[i] != ',') i++; i++;
+	beamsize = atoi(param_buffer+i);
+	while(param_buffer[i] != ',') i++; i++;
+	epsilon = atof(param_buffer+i);
+
+	// Done
+	fclose(file);
+	printf("Parameters loaded: max_exp: %d, beamsize: %d, epsilon: %f\n",max_exp, beamsize, epsilon);
+
+	return;
+}
+
+// Loading problem from file
+void load_problem(char *filename, State **start, State **goal){
 
 	// Checking if origin file exists
 	FILE *file  = fopen(filename,"r");
@@ -93,23 +123,14 @@ void load_problem(char *filename, State **start, State **goal, int *max_exp, int
 	fgets(init_boxes,BUFFER_SIZE,file);
 	fgets(final_boxes,BUFFER_SIZE,file);
 
-	// Getting paramters
-	char param_buffer[BUFFER_SIZE];
-	fgets(param_buffer,BUFFER_SIZE,file);
-	int i = 0;
-	*max_exp = atoi(param_buffer);
-	while(param_buffer[i] != ',') i++; i++;
-	*beamsize = atoi(param_buffer+i);
-	while(param_buffer[i] != ',') i++; i++;
-	*epsilon = atof(param_buffer+i);
-
 	// Initializing start and goal states
 	*start	= new State(init_boxes,init_robot);
 	*goal	= new State(final_boxes);
 
 	// Done
 	fclose(file);
-	printf("File '%s' loaded.\n",filename);
+	printf("Start: %s",(*start)->sprint());
+	printf("Goal: %s",(*goal)->sprint());
 
 	return;
 }
@@ -156,8 +177,7 @@ void clear_list(list<State*> *state_list,State* start, State* goal){
 void print_plan(stack<State> plan, State* goal, Map *map){
 	int i = 0;
 	while(!plan.empty()){
-		printf("%3d: ",i++);
-		plan.top().print();
+		printf("%3d: %s",i++,plan.top().sprint());
 		display_world(&plan.top(),goal,map);
 		plan.pop();
 	}
@@ -174,18 +194,7 @@ void store_plan(char *filename, stack<State> plan){
 	}
 
 	while(!plan.empty()){
-
-		// Boxes positions
-		for(Pos pos : plan.top().boxes)
-			fprintf(file, "%d,%d,",pos.i,pos.j);
-		fprintf(file, ":");
-
-
-		// Robots positions
-		for(Pos pos : plan.top().robots)
-			fprintf(file, "%d,%d,",pos.i,pos.j);
-		fprintf(file, "\n");
-
+		fprintf(file,"%s",plan.top().sprint());
 		plan.pop();
 	}
 
@@ -236,7 +245,7 @@ void new_child(State *child, list<State*> *open, vector<State*> *closed, State *
 }
 
 // Search for a plan
-int search(State *start, State *goal, Map *map, stack<State> *plan, int max_exp, int beamsize, float epsilon){
+int search(State *start, State *goal, Map *map, stack<State> &plan, int max_exp, int beamsize, float epsilon){
 
 	stack<State*> children;
 	list<State*> open;
@@ -278,7 +287,7 @@ int search(State *start, State *goal, Map *map, stack<State> *plan, int max_exp,
 	}
 
 	// Final path position
-	plan->push(*state);
+	plan.push(*state);
 
 	// Defining path as a sequence of positions
 	for(;;){
@@ -290,7 +299,7 @@ int search(State *start, State *goal, Map *map, stack<State> *plan, int max_exp,
 		state = state->parent;
 		
 		// Inserting position in the path vector
-		plan->push(*state);
+		plan.push(*state);
 	}
 
 	// Clearing memory

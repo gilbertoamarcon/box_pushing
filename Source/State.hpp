@@ -7,6 +7,7 @@
 #include <cmath>
 #include <vector>
 #include <stack>
+#include <cstring>
 #include "Map.hpp"
 #include "Pos.hpp"
 
@@ -53,7 +54,7 @@ class State{
 		// Heuristic distance to goal
 		int heuristic(State *goal);
 
-		// Print state representation on console
+		// Write state representation to string
 		char* sprint();
 
 		// Return true io state equals goal
@@ -63,6 +64,9 @@ class State{
 		void expand(stack<State*> *children, Map *map);
 
 	private:
+
+		// Buffer for printing
+		char print_buffer[BUFFER_SIZE];
 
 		// Recursive action vector expansion
 		void expand_action_vector(string action_vector, int i, char action, stack<State*> *children, Map *map);
