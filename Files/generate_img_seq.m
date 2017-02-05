@@ -9,7 +9,7 @@ FIG_PATTERN	= '%s%03d.png';
 GOAL_APHA   = 0.20;
 DISP_PATH   = 1;
 
-BLOCK_SIZE  = 300;
+BLOCK_SIZE  = 1000;
 
 % Map loading
 map = fliplr(csvread(MAP_FILE));

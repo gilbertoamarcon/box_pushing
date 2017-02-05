@@ -1,30 +1,5 @@
 #include "State.hpp"
 
-// Manhattan distance between a and b
-int manhattan(Pos a, Pos b){
-	return abs(a.i - b.i) + abs(a.j - b.j);
-}
-
-// Compares two positions
-bool compare_pos(Pos a, Pos b){
-	return a.i == b.i && a.j == b.j;
-}
-
-// Parsing string into position vector
-void parse_pos(char *str, vector<Pos> *pos){
-	int i = 0;
-	int j = 0;
-	for(;;){
-		i = atoi(str);
-		while(str[0] != ',') str++; str++;
-		j = atoi(str);
-		pos->push_back(Pos(i,j));
-		while(str[0] != ',' && str[0] != '\0') str++;
-		if(str[0] == '\0') return;
-		str++;
-	}
-}
-
 // Constructor from parent
 State::State(State *parent,string action_vector){
 
@@ -49,16 +24,86 @@ State::State(char *boxes_str,char *robots_str){
 
 	// Parsing box positions
 	if(boxes_str != NULL)
-		parse_pos(boxes_str,&boxes);
+		Pos::parse(boxes_str,&boxes);
 
 	// Parsing robot positions
 	if(robots_str != NULL)
-		parse_pos(robots_str,&robots);
+		Pos::parse(robots_str,&robots);
 
 	// Initializing action vector with no action
 	for(Pos robot : this->robots)
 		action_vector.push_back('N');
 
+}
+
+// Compare with two states
+//  1: this > state
+//  0: this = state
+// -1: this < state
+int State::compare(State *sta, State *stb){
+	int aux = 0;
+	aux = Pos::compare_vec(sta->boxes,stb->boxes);
+	if(aux != 0) return aux;
+	aux = Pos::compare_vec(sta->robots,stb->robots);
+	return aux;
+}
+
+// Binary state search
+bool State::binary_search(vector<State*> *vec, State *state){
+	int aux = 0;
+	int m = 0;
+	int l = 0;
+	int r = vec->size()-1;
+	for(;;){
+		if(l > r)
+			return false;
+		m = floor((l+r)/2);
+		aux = State::compare(vec->at(m),state);
+		if(aux == 0)
+			return true;
+		if(aux ==  1)
+			r = m-1;
+		else
+			l = m+1;
+	}
+}
+
+// Heuristic
+int State::heuristic(State *goal){
+
+	// If number of boxes different, something is wrong
+	if(boxes.size() != goal->boxes.size())
+		return 0;
+
+	int max_dist = 0;	// Max Manhattan distance 
+	int sum_dist = 0;	// Sum of all Manhattan distances
+	for(int i = 0; i < boxes.size(); i++){
+		int dist = Pos::manhattan(boxes.at(i),goal->boxes.at(i));
+		sum_dist += dist;
+		if(dist > max_dist)
+			max_dist = dist;
+	}
+
+	// Manhattan distance per robot
+	int dist_per_robot = ceil(((double)sum_dist)/robots.size());
+
+	if(dist_per_robot > max_dist)
+		return dist_per_robot;
+	return max_dist;
+}
+
+// Print state representation on console
+void State::print(){
+	printf("%s ",action_vector.c_str());
+	for(Pos pos : boxes) pos.print();
+	printf(":");
+	for(Pos pos : robots) pos.print();
+	printf("\n");
+}
+
+// Check if two states are equal
+bool State::is_goal(State *goal){
+	return Pos::compare_vec(boxes,goal->boxes) == 0;
 }
 
 // Return stack with all valid children states
@@ -114,7 +159,7 @@ bool State::validate(Map *map){
 
 				// Box displacement
 				for(int j = 0; j < boxes.size(); j++)
-					if(compare_pos(robots.at(i),boxes.at(j))){
+					if(Pos::compare(robots.at(i),boxes.at(j))){
 
 						// Box displacing
 						temp_boxes.at(j).j--;
@@ -138,7 +183,7 @@ bool State::validate(Map *map){
 
 				// Box displacement
 				for(int j = 0; j < boxes.size(); j++)
-					if(compare_pos(robots.at(i),boxes.at(j))){
+					if(Pos::compare(robots.at(i),boxes.at(j))){
 
 						// Box displacing
 						temp_boxes.at(j).i++;
@@ -162,7 +207,7 @@ bool State::validate(Map *map){
 				
 				// Box displacement
 				for(int j = 0; j < boxes.size(); j++)
-					if(compare_pos(robots.at(i),boxes.at(j))){
+					if(Pos::compare(robots.at(i),boxes.at(j))){
 
 						// Box displacing
 						temp_boxes.at(j).j++;
@@ -186,7 +231,7 @@ bool State::validate(Map *map){
 				
 				// Box displacement
 				for(int j = 0; j < boxes.size(); j++)
-					if(compare_pos(robots.at(i),boxes.at(j))){
+					if(Pos::compare(robots.at(i),boxes.at(j))){
 
 						// Box displacing
 						temp_boxes.at(j).i--;
@@ -212,11 +257,11 @@ bool State::validate(Map *map){
 		
 		// Checking robot-robot collisions
 		for(int j = 0; j < i; j++)
-			if(compare_pos(robots.at(i),robots.at(j))) return false;
+			if(Pos::compare(robots.at(i),robots.at(j))) return false;
 		
 		// Checking robot-box collisions
 		for(Pos box : boxes)
-			if(compare_pos(robots.at(i),box)) return false;
+			if(Pos::compare(robots.at(i),box)) return false;
 
 	}
 

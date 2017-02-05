@@ -5,7 +5,6 @@
 #include <iostream>
 #include <string>
 #include <ctime>
-#include <cmath>
 #include <vector>
 #include "State.hpp"
 
@@ -14,10 +13,7 @@
 #define MAP_FILE	"Files/map.csv"
 #define PLAN_FILE	"Files/plan.csv"
 
-// State display
-void display(State *state, Map *map=NULL, State *goal=NULL);
-
-// World display
+// World print
 void display_world(State *state, State *goal, Map *map);
 
 // Clear list of states from memory
@@ -28,21 +24,6 @@ void print_plan(stack<State> plan, State* goal, Map *map);
 
 // Store plan execution history
 void store_plan(char *filename, stack<State> plan);
-
-// Compare two vectors
-bool vector_equal(vector<Pos> veca, vector<Pos> vecb);
-
-// Compare two states
-int state_compare(State *sta, State *stb);
-
-// Check if two states are equal
-bool state_equal(State *sta, State *stb);
-
-// Heuristic
-double heuristic(State *node, State *goal);
-
-// Binary state search
-bool binary_search(vector<State*> *vec, State *state);
 
 // Insert child to open list if correct conditions met
 void new_child(State *child, list<State*> *open, vector<State*> *closed, State *goal, int beamsize, float epsilon);
@@ -67,10 +48,10 @@ int main(int argc, char **argv){
 	Map *map = new Map(MAP_FILE);
 
 	printf("Start: ");
-	display(start,map);
+	start->print();
 
 	printf("Goal: ");
-	display(goal,map);
+	goal->print();
 
 	// Running and taking execution time
 	stack<State> plan;
@@ -135,27 +116,7 @@ void load_problem(char *filename, State **start, State **goal, int *max_exp, int
 	return;
 }
 
-// State display
-void display(State *state, Map *map, State *goal){
-	printf("%s ",state->action_vector.c_str());
-	for(Pos pos : state->boxes)
-		printf("(%d,%d)",pos.i,pos.j);
-	printf(" : ");
-	for(Pos pos : state->robots)
-		printf("(%d,%d)",pos.i,pos.j);
-	printf("\n");
-
-	if(map == NULL){
-		// printf("g: %f\n",state->g);
-		// printf("f: %f\n",state->f);
-		return;
-	}
-
-	display_world(state,goal,map);
-	printf("\n");
-}
-
-// World display
+// World print
 void display_world(State *state, State *goal, Map *map){
 	for(int i = map->rows-1; i >= 0; i--){
 		printf("|");
@@ -163,17 +124,17 @@ void display_world(State *state, State *goal, Map *map){
 			int element = (map->get_value(i,j))?'X':' ';
 			if(goal != NULL)
 				for(int k = 0; k < goal->boxes.size(); k++)
-					if(compare_pos(Pos(i,j),goal->boxes.at(k))){
+					if(Pos::compare(Pos(i,j),goal->boxes.at(k))){
 						element = k+97;
 						break;
 					}
 			for(int k = 0; k < state->robots.size(); k++)
-				if(compare_pos(Pos(i,j),state->robots.at(k))){
+				if(Pos::compare(Pos(i,j),state->robots.at(k))){
 					element = k+48;
 					break;
 				}
 			for(int k = 0; k < state->boxes.size(); k++)
-				if(compare_pos(Pos(i,j),state->boxes.at(k))){
+				if(Pos::compare(Pos(i,j),state->boxes.at(k))){
 					element = k+65;
 					break;
 				}
@@ -198,7 +159,8 @@ void print_plan(stack<State> plan, State* goal, Map *map){
 	int i = 0;
 	while(!plan.empty()){
 		printf("%3d: ",i++);
-		display(&plan.top(),map,goal);
+		plan.top().print();
+		display_world(&plan.top(),goal,map);
 		plan.pop();
 	}
 }
@@ -236,101 +198,18 @@ void store_plan(char *filename, stack<State> plan){
 	return;
 }
 
-// Check if two stacks are equal
-bool vector_equal(vector<Pos> veca, vector<Pos> vecb){
-	if(veca.size() != vecb.size()) return false;
-	for(int i = 0; i < veca.size(); i++)
-		if(!compare_pos(veca.at(i),vecb.at(i))) return false;
-	return true;
-}
-
-// Compare two states
-//  1: sta > stb
-//  0: sta = stb
-// -1: sta < stb
-int state_compare(State *sta, State *stb){
-	for(int i = 0; i < sta->boxes.size(); i++){
-		if(sta->boxes.at(i).i > stb->boxes.at(i).i) return  1;
-		if(sta->boxes.at(i).i < stb->boxes.at(i).i) return -1;
-		if(sta->boxes.at(i).j > stb->boxes.at(i).j) return  1;
-		if(sta->boxes.at(i).j < stb->boxes.at(i).j) return -1;
-	}
-	for(int i = 0; i < sta->robots.size(); i++){
-		if(sta->robots.at(i).i > stb->robots.at(i).i) return  1;
-		if(sta->robots.at(i).i < stb->robots.at(i).i) return -1;
-		if(sta->robots.at(i).j > stb->robots.at(i).j) return  1;
-		if(sta->robots.at(i).j < stb->robots.at(i).j) return -1;
-	}
-	return 0;	
-}
-
-// Check if two states are equal
-bool state_equal(State *sta, State *stb){
-	for(int i = 0; i < sta->boxes.size(); i++){
-		if(sta->boxes.at(i).i > stb->boxes.at(i).i) return false;
-		if(sta->boxes.at(i).i < stb->boxes.at(i).i) return false;
-		if(sta->boxes.at(i).j > stb->boxes.at(i).j) return false;
-		if(sta->boxes.at(i).j < stb->boxes.at(i).j) return false;
-	}
-	return true;
-}
-
-// Heuristic
-double heuristic(State *node, State *goal){
-
-	// If number of boxes different, something is wrong
-	if(node->boxes.size() != goal->boxes.size())
-		return 0;
-
-	int max_dist = 0;	// Max Manhattan distance 
-	int sum_dist = 0;	// Sum of all Manhattan distances
-	for(int i = 0; i < node->boxes.size(); i++){
-		int dist = manhattan(node->boxes.at(i),goal->boxes.at(i));
-		sum_dist += dist;
-		if(dist > max_dist)
-			max_dist = dist;
-	}
-
-	// Manhattan distance per robot
-	double dist_per_robot = ceil(((double)sum_dist)/node->robots.size());
-
-	if(dist_per_robot > max_dist)
-		return dist_per_robot;
-	return max_dist;
-}
-
-// Binary state search
-bool binary_search(vector<State*> *vec, State *state){
-	int aux = 0;
-	int m = 0;
-	int l = 0;
-	int r = vec->size()-1;
-	for(;;){
-		if(l > r)
-			return false;
-		m = floor((l+r)/2);
-		aux = state_compare(vec->at(m),state);
-		if(aux == 0)
-			return true;
-		if(aux ==  1)
-			r = m-1;
-		else
-			l = m+1;
-	}
-}
-
 // Insert child to open list if correct conditions met
 void new_child(State *child, list<State*> *open, vector<State*> *closed, State *goal, int beamsize, float epsilon){
 
 	// Checking if in the closed list
-	if(binary_search(closed,child)){
+	if(State::binary_search(closed,child)){
 		delete child;
 		return;
 	}
 
 	// Check if in the open list
 	for(State* node : *open)
-		if(state_compare(child,node) == 0){
+		if(State::compare(child,node) == 0){
 			if(child->g >= node->g){
 				delete child;
 				return;
@@ -341,7 +220,7 @@ void new_child(State *child, list<State*> *open, vector<State*> *closed, State *
 		}
 
 	// Computing the heuristic
-	double h = heuristic(child,goal);
+	int h = child->heuristic(goal);
 
 	// Computing the estimated path cost
 	child->f = child->g + epsilon*h;
@@ -384,13 +263,13 @@ int search(State *start, State *goal, Map *map, stack<State> *plan, int max_exp,
 		// Inserting current node into the sorted closed list
 		vector<State*>::iterator it = closed.begin();
 		for(it = closed.begin(); it != closed.end(); it++){
-			int aux = state_compare((*it),state);
+			int aux = State::compare((*it),state);
 			if(aux ==  0 || aux == 1) break;
 		}
 		closed.insert(it,state);
 
 		// Checking if goal found
-		if(state_equal(state,goal)) break;
+		if(state->is_goal(goal)) break;
 
 		// Expanding current node
 		state->expand(&children,map);
@@ -407,7 +286,7 @@ int search(State *start, State *goal, Map *map, stack<State> *plan, int max_exp,
 	for(;;){
 
 		// Check if path completed
-		if(state_compare(state,start) == 0) break;
+		if(State::compare(state,start) == 0) break;
 
 		// Moving to parent node
 		state = state->parent;

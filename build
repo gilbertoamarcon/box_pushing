@@ -1,2 +1,2 @@
-g++ Source/Main.cpp Source/State.cpp Source/Map.cpp -o Bin/main -lm -w -std=c++11
+g++ Source/Main.cpp Source/Pos.cpp Source/State.cpp Source/Map.cpp -o Bin/main -lm -w -std=c++11
 ./Bin/main
