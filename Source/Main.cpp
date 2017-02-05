@@ -33,10 +33,16 @@ void store_plan(char *filename, stack<State> plan);
 bool vector_equal(vector<Pos> veca, vector<Pos> vecb);
 
 // Compare two states
-bool state_equal(State *sta, State *stb, bool robot_pos);
+int state_compare(State *sta, State *stb);
+
+// Check if two states are equal
+bool state_equal(State *sta, State *stb);
 
 // Heuristic
 double heuristic(State *node, State *goal);
+
+// Binary state search
+bool binary_search(vector<State*> *vec, State *state);
 
 // Insert child to open list if correct conditions met
 void new_child(State *child, list<State*> *open, vector<State*> *closed, State *goal, int beamsize, float epsilon);
@@ -140,8 +146,8 @@ void display(State *state, Map *map, State *goal){
 	printf("\n");
 
 	if(map == NULL){
-		printf("g: %f\n",state->g);
-		printf("f: %f\n",state->f);
+		// printf("g: %f\n",state->g);
+		// printf("f: %f\n",state->f);
 		return;
 	}
 
@@ -232,15 +238,40 @@ void store_plan(char *filename, stack<State> plan){
 
 // Check if two stacks are equal
 bool vector_equal(vector<Pos> veca, vector<Pos> vecb){
+	if(veca.size() != vecb.size()) return false;
 	for(int i = 0; i < veca.size(); i++)
 		if(!compare_pos(veca.at(i),vecb.at(i))) return false;
 	return true;
 }
 
 // Compare two states
-bool state_equal(State *sta, State *stb, bool robot_pos){
-	if(robot_pos && !vector_equal(sta->robots, stb->robots)) return false;
-	if(!vector_equal(sta->boxes, stb->boxes)) return false;
+//  1: sta > stb
+//  0: sta = stb
+// -1: sta < stb
+int state_compare(State *sta, State *stb){
+	for(int i = 0; i < sta->boxes.size(); i++){
+		if(sta->boxes.at(i).i > stb->boxes.at(i).i) return  1;
+		if(sta->boxes.at(i).i < stb->boxes.at(i).i) return -1;
+		if(sta->boxes.at(i).j > stb->boxes.at(i).j) return  1;
+		if(sta->boxes.at(i).j < stb->boxes.at(i).j) return -1;
+	}
+	for(int i = 0; i < sta->robots.size(); i++){
+		if(sta->robots.at(i).i > stb->robots.at(i).i) return  1;
+		if(sta->robots.at(i).i < stb->robots.at(i).i) return -1;
+		if(sta->robots.at(i).j > stb->robots.at(i).j) return  1;
+		if(sta->robots.at(i).j < stb->robots.at(i).j) return -1;
+	}
+	return 0;	
+}
+
+// Check if two states are equal
+bool state_equal(State *sta, State *stb){
+	for(int i = 0; i < sta->boxes.size(); i++){
+		if(sta->boxes.at(i).i > stb->boxes.at(i).i) return false;
+		if(sta->boxes.at(i).i < stb->boxes.at(i).i) return false;
+		if(sta->boxes.at(i).j > stb->boxes.at(i).j) return false;
+		if(sta->boxes.at(i).j < stb->boxes.at(i).j) return false;
+	}
 	return true;
 }
 
@@ -268,19 +299,38 @@ double heuristic(State *node, State *goal){
 	return max_dist;
 }
 
+// Binary state search
+bool binary_search(vector<State*> *vec, State *state){
+	int aux = 0;
+	int m = 0;
+	int l = 0;
+	int r = vec->size()-1;
+	for(;;){
+		if(l > r)
+			return false;
+		m = floor((l+r)/2);
+		aux = state_compare(vec->at(m),state);
+		if(aux == 0)
+			return true;
+		if(aux ==  1)
+			r = m-1;
+		else
+			l = m+1;
+	}
+}
+
 // Insert child to open list if correct conditions met
 void new_child(State *child, list<State*> *open, vector<State*> *closed, State *goal, int beamsize, float epsilon){
 
-	// Check if in the closed list
-	for(State* node : *closed)
-		if(state_equal(child,node,1)){
-			delete child;
-			return;
-		}
+	// Checking if in the closed list
+	if(binary_search(closed,child)){
+		delete child;
+		return;
+	}
 
 	// Check if in the open list
 	for(State* node : *open)
-		if(state_equal(child,node,1)){
+		if(state_compare(child,node) == 0){
 			if(child->g >= node->g){
 				delete child;
 				return;
@@ -331,13 +381,16 @@ int search(State *start, State *goal, Map *map, stack<State> *plan, int max_exp,
 		state = open.front();
 		open.pop_front();
 
-		// display(state);
-
-		// Adding current node to the closed list
-		closed.push_back(state);
+		// Inserting current node into the sorted closed list
+		vector<State*>::iterator it = closed.begin();
+		for(it = closed.begin(); it != closed.end(); it++){
+			int aux = state_compare((*it),state);
+			if(aux ==  0 || aux == 1) break;
+		}
+		closed.insert(it,state);
 
 		// Checking if goal found
-		if(state_equal(state,goal,0)) break;
+		if(state_equal(state,goal)) break;
 
 		// Expanding current node
 		state->expand(&children,map);
@@ -354,7 +407,7 @@ int search(State *start, State *goal, Map *map, stack<State> *plan, int max_exp,
 	for(;;){
 
 		// Check if path completed
-		if(state_equal(state,start,1)) break;
+		if(state_compare(state,start) == 0) break;
 
 		// Moving to parent node
 		state = state->parent;
