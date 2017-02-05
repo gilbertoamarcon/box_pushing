@@ -41,7 +41,9 @@ bool Pos::compare(Pos a, Pos b){
 	return a.i == b.i && a.j == b.j;
 }
 
-// Print position representation on console
-void Pos::print(){
-	printf("%d,%d",i,j);
+// Return string representation of position
+char* Pos::sprint(){
+	char buffer[BUFFER_SIZE];
+	sprintf(buffer,"%d,%d",i,j);
+	return buffer;
 }

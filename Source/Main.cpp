@@ -47,11 +47,9 @@ int main(int argc, char **argv){
 
 	Map *map = new Map(MAP_FILE);
 
-	printf("Start: ");
-	start->print();
+	printf("Start: %s",start->sprint());
 
-	printf("Goal: ");
-	goal->print();
+	printf("Goal: %s",goal->sprint());
 
 	// Running and taking execution time
 	stack<State> plan;

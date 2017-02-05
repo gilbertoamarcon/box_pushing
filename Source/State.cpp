@@ -93,12 +93,14 @@ int State::heuristic(State *goal){
 }
 
 // Print state representation on console
-void State::print(){
-	printf("%s ",action_vector.c_str());
-	for(Pos pos : boxes) pos.print();
-	printf(":");
-	for(Pos pos : robots) pos.print();
-	printf("\n");
+char* State::sprint(){
+	char buffer[BUFFER_SIZE];
+	sprintf(buffer,"%s ",action_vector.c_str());
+	for(Pos pos : boxes) sprintf(buffer,"%s%s ",buffer,pos.sprint());
+	sprintf(buffer,":");
+	for(Pos pos : robots) sprintf(buffer,"%s%s ",buffer,pos.sprint());
+	sprintf(buffer,"\n");
+	return buffer;
 }
 
 // Check if two states are equal

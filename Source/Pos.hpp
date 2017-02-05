@@ -8,6 +8,9 @@
 #include <vector>
 #include <stack>
 
+// File Parameters
+#define BUFFER_SIZE		256
+
 using namespace std;
 
 // Position structure
@@ -39,8 +42,8 @@ class Pos{
 			this->j = j;
 		}
 
-		// Print position representation on console
-		void print();
+		// Return string representation of position
+		char* sprint();
 };
 
 #endif

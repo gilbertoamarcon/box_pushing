@@ -54,7 +54,7 @@ class State{
 		int heuristic(State *goal);
 
 		// Print state representation on console
-		void print();
+		char* sprint();
 
 		// Return true io state equals goal
 		bool is_goal(State *goal);
