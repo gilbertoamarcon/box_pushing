@@ -103,7 +103,6 @@ bool State::binary_search(vector<State*> *vec, State *state){
 // World print
 void State::display_world(State *state){
 	for(int i = map->rows-1; i >= 0; i--){
-		printf("|");
 		for(int j = 0; j < map->cols; j++){
 			int element = (map->get_value(i,j))?'X':' ';
 			if(goal != NULL)
@@ -122,9 +121,9 @@ void State::display_world(State *state){
 					element = k+65;
 					break;
 				}
-			printf(" %c ",element);
+			printf("%c ",element);
 		}
-		printf("|\n");
+		printf("\n");
 	}
 	printf("\n");
 }

@@ -1,5 +1,11 @@
 #include "Search.hpp"
 
+// File names
+#define CFG_FILE	"files/cfg.csv"
+#define MAP_FILE	"files/map.csv"
+#define PROB_FILE	"files/problem.csv"
+#define PLAN_FILE	"files/plan.csv"
+
 int main(int argc, char **argv){
 
 	// Search configuration parameters

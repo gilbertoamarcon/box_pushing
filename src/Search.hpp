@@ -7,12 +7,6 @@
 #include <list>
 #include "State.hpp"
 
-// File names
-#define PROB_FILE	"Files/problem.csv"
-#define MAP_FILE	"Files/map.csv"
-#define PLAN_FILE	"Files/plan.csv"
-#define CFG_FILE	"Files/cfg.csv"
-
 using std::string;
 using std::vector;
 using std::stack;
