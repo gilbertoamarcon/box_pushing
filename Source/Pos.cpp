@@ -1,7 +1,8 @@
-#include "State.hpp"
+#include "Pos.hpp"
 
 // Parsing string into position vector
 void Pos::parse(char *str, vector<Pos> *pos){
+	if(str == NULL) return;
 	int i = 0;
 	int j = 0;
 	for(;;){
@@ -42,6 +43,6 @@ bool Pos::compare(Pos a, Pos b){
 }
 
 // Return string representation of position
-void Pos::sprint(char *buffer){
+void Pos::to_str(char *buffer){
 	sprintf(buffer,"%s%d,%d,",buffer,i,j);
 }

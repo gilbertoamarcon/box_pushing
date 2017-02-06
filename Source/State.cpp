@@ -1,5 +1,9 @@
 #include "State.hpp"
 
+Map* State::map;
+State* State::start;
+State* State::goal;
+
 // Constructor from parent
 State::State(State *parent,string action_vector){
 
@@ -16,24 +20,52 @@ State::State(State *parent,string action_vector){
 	this->g++;
 }
 
-State::State(char *boxes_str,char *robots_str){
+State::State(char *str){
 
 	this->parent = NULL;
 	this->g = 0;
 	this->f = 0;
 
-	// Parsing box positions
-	if(boxes_str != NULL)
-		Pos::parse(boxes_str,&boxes);
-
-	// Parsing robot positions
-	if(robots_str != NULL)
-		Pos::parse(robots_str,&robots);
+	char *boxes_str		= strtok(str,":");
+	char *robots_str	= strtok(NULL,":");
+	Pos::parse(boxes_str,&boxes);
+	Pos::parse(robots_str,&robots);
 
 	// Initializing action vector with no action
 	for(Pos robot : this->robots)
 		action_vector.push_back('N');
 
+}
+
+// Loading problem from file
+void State::load_problem(char *filename){
+
+	// Checking if origin file exists
+	FILE *file  = fopen(filename,"r");
+	if(file == NULL){
+		printf("Error: Origin file '%s' not found.\n",filename);
+		return;
+	}
+	
+	// Getting problem initial and goal conditions
+	char init[BUFFER_SIZE];
+	char final[BUFFER_SIZE];
+	fgets(init,BUFFER_SIZE,file);
+	fgets(final,BUFFER_SIZE,file);
+
+	// Done
+	fclose(file);
+
+	// Initializing start and goal states
+	start	= new State(init);
+	goal	= new State(final);
+
+	return;
+}
+
+// Load map file
+void State::load_map(char *filename){
+	map = new Map(filename);
 }
 
 // Compare with two states
@@ -68,6 +100,35 @@ bool State::binary_search(vector<State*> *vec, State *state){
 	}
 }
 
+// World print
+void State::display_world(State *state){
+	for(int i = map->rows-1; i >= 0; i--){
+		printf("|");
+		for(int j = 0; j < map->cols; j++){
+			int element = (map->get_value(i,j))?'X':' ';
+			if(goal != NULL)
+				for(int k = 0; k < goal->boxes.size(); k++)
+					if(Pos::compare(Pos(i,j),goal->boxes.at(k))){
+						element = k+97;
+						break;
+					}
+			for(int k = 0; k < state->robots.size(); k++)
+				if(Pos::compare(Pos(i,j),state->robots.at(k))){
+					element = k+48;
+					break;
+				}
+			for(int k = 0; k < state->boxes.size(); k++)
+				if(Pos::compare(Pos(i,j),state->boxes.at(k))){
+					element = k+65;
+					break;
+				}
+			printf(" %c ",element);
+		}
+		printf("|\n");
+	}
+	printf("\n");
+}
+
 // Heuristic
 int State::heuristic(State *goal){
 
@@ -93,11 +154,11 @@ int State::heuristic(State *goal){
 }
 
 // Write state representation to string
-char* State::sprint(){
+char* State::to_str(){
 	strcpy(print_buffer,"");
-	for(Pos pos : boxes) pos.sprint(print_buffer);
+	for(Pos pos : boxes) pos.to_str(print_buffer);
 	strcat(print_buffer,":");
-	for(Pos pos : robots) pos.sprint(print_buffer);
+	for(Pos pos : robots) pos.to_str(print_buffer);
 	strcat(print_buffer,"\n");
 	return print_buffer;
 }
@@ -108,13 +169,13 @@ bool State::is_goal(State *goal){
 }
 
 // Return stack with all valid children states
-void State::expand(stack<State*> *children, Map *map){
+void State::expand(stack<State*> *children){
 	string action_vector;
-	expand_action_vector(action_vector,robots.size(),NULL,children,map);
+	expand_action_vector(action_vector,robots.size(),NULL,children);
 }
 
 // Recursive action vector expansion
-void State::expand_action_vector(string action_vector, int r, char action, stack<State*> *children, Map *map){
+void State::expand_action_vector(string action_vector, int r, char action, stack<State*> *children){
 
 	// Adding action to action vector if not root node
 	if(action != NULL)
@@ -123,7 +184,7 @@ void State::expand_action_vector(string action_vector, int r, char action, stack
 	// Leaf node, create and validate children 
 	if(r-- == 0){
 		State *child = new State(this,action_vector);
-		if(child->validate(map))
+		if(child->validate())
 			children->push(child);
 		else
 			delete child;
@@ -131,15 +192,15 @@ void State::expand_action_vector(string action_vector, int r, char action, stack
 	}
 
 	// Recursive expansion
-	expand_action_vector(action_vector,r,'N',children,map);
-	expand_action_vector(action_vector,r,'L',children,map);
-	expand_action_vector(action_vector,r,'U',children,map);
-	expand_action_vector(action_vector,r,'R',children,map);
-	expand_action_vector(action_vector,r,'D',children,map);
+	expand_action_vector(action_vector,r,'N',children);
+	expand_action_vector(action_vector,r,'L',children);
+	expand_action_vector(action_vector,r,'U',children);
+	expand_action_vector(action_vector,r,'R',children);
+	expand_action_vector(action_vector,r,'D',children);
 }
 
 // Validate state against world rules
-bool State::validate(Map *map){
+bool State::validate(){
 
 	vector<Pos> temp_boxes = boxes;
 

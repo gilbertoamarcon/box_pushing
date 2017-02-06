@@ -1,17 +1,10 @@
 #ifndef POS_H
 #define POS_H
-#include <stdlib.h>
-#include <stdio.h>
-#include <cstdlib>
 #include <string>
-#include <cmath>
 #include <vector>
-#include <stack>
 
-// File Parameters
-#define BUFFER_SIZE		256
-
-using namespace std;
+using std::string;
+using std::vector;
 
 // Position structure
 class Pos{
@@ -43,7 +36,7 @@ class Pos{
 		}
 
 		// Return string representation of position
-		void sprint(char *buffer);
+		void to_str(char *buffer);
 };
 
 #endif

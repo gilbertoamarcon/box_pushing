@@ -1,10 +1,7 @@
 #ifndef MAP_H
 #define MAP_H
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdio>
 #include <cstdlib>
-
-using namespace std;
 
 // File Parameters
 #define BUFFER_SIZE		256
