@@ -2,9 +2,9 @@ clear all;
 close all;
 clc;
 
-MAP_FILE    = 'Files/map.csv';
-PLAN_FILE   = 'Files/plan.csv';
-FIG_PREFIX	= 'Figs/FIG';
+MAP_FILE    = 'files/map.csv';
+PLAN_FILE   = 'files/plan.csv';
+FIG_PREFIX	= 'figs/FIG';
 FIG_PATTERN	= '%s%03d.png';
 GOAL_APHA   = 0.20;
 DISP_PATH   = 1;

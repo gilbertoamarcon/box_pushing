@@ -2,9 +2,9 @@ clear all;
 close all;
 clc;
 
-FIG_PREFIX	= 'Figs/FIG';   
+FIG_PREFIX	= 'files/FIG';   
 FIG_PATTERN	= '%s%03d.png';
-MOV_NAME	= 'Figs/MOV.avi';
+MOV_NAME	= 'files/MOV.avi';
 MOV_FRATE	= 4;
 
 % Writting video
