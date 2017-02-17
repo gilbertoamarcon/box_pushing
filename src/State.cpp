@@ -198,6 +198,11 @@ void State::expand_action_vector(string action_vector, int r, char action, stack
 	expand_action_vector(action_vector,r,'D',children);
 }
 
+// Check if a set of box coordinates would result in a deadlock
+bool State::is_Deadlock(int x, int y){
+	return vec_contains(map->deadlocks, Pos(x,y));
+}
+
 // Validate state against world rules
 bool State::validate(){
 
@@ -225,6 +230,8 @@ bool State::validate(){
 						// Box displacing
 						temp_boxes.at(j).j--;
 
+						// Deadlock Checking
+						if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 						// Box-wall collision checking
 						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 
@@ -249,6 +256,8 @@ bool State::validate(){
 						// Box displacing
 						temp_boxes.at(j).i++;
 
+						// Deadlock Checking
+						if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 						// Box-wall collision checking
 						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 
@@ -273,6 +282,8 @@ bool State::validate(){
 						// Box displacing
 						temp_boxes.at(j).j++;
 
+						// Deadlock Checking
+						if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 						// Box-wall collision checking
 						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 
@@ -297,6 +308,8 @@ bool State::validate(){
 						// Box displacing
 						temp_boxes.at(j).i--;
 
+						// Deadlock Checking
+						if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 						// Box-wall collision checking
 						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 

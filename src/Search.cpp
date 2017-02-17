@@ -124,6 +124,10 @@ void Search::search(){
 
 	State *state = NULL;
 
+	// Mark invalid positions for deadlock pruning
+	State::map->set_Corners();
+	State::map->set_Deadlocks(State::goal->boxes);
+
 	// Initializing open list
 	open.push_back(State::start);
 	

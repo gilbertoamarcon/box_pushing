@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <ctime>
-#include "State.hpp"#include <ctime>
+#include "State.hpp"
 
 void tic();
 

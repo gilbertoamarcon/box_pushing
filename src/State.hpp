@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <stack>
+#include "utils.hpp"
 #include "Map.hpp"
 #include "Pos.hpp"
 
@@ -72,7 +73,7 @@ class State{
 		// Write state representation to string
 		char* to_str();
 
-		// Return true io state equals goal
+		// Return true if state equals goal
 		bool is_goal(State *goal);
 
 		// Return stack with children states
@@ -88,6 +89,10 @@ class State{
 		
 		// Validate state against world rules
 		bool validate();
+
+		// Check if a set of box coordinates would result in a deadlock
+		bool is_Deadlock(int i, int j);
+
 };
 
 #endif

@@ -2,13 +2,12 @@
 
 // File names
 #define CFG_FILE	"files/cfg.csv"
-#define MAP_FILE	"files/map.csv"
-#define PROB_FILE	"files/problem.csv"
-#define PLAN_FILE	"files/plan.csv"
+#define MAP_FILE	"files/ovuncTest/map.csv"
+#define PROB_FILE	"files/ovuncTest/problem.csv"
+#define PLAN_FILE	"files/ovuncTest/plan.csv"
 
 int main(int argc, char **argv){
-
-	// Search configuration parameters
+	// Search configuration parameters 
 	Search::load_search_parameters(CFG_FILE);
 
 	// Loading obstacle map
@@ -34,6 +33,7 @@ int main(int argc, char **argv){
 	}
 	else
 		printf("Plan failed.\n");
+		
 
 	return 0;
 
