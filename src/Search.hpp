@@ -32,7 +32,7 @@ class Search{
 		State *goal;
 
 		// Plan
-		stack<State> plan;
+		vector<State> plan;
 
 		// Loading configuration from file
 		void load_search_parameters(char *filename);
@@ -46,7 +46,7 @@ class Search{
 		// Search for a plan
 		void search();
 
-		void search_ind(State *start, State *goal);
+		void check_clashes(vector<stack<State>> plans);
 
 	private:
 

@@ -31,11 +31,13 @@ int main(int argc, char **argv){
 	// Running and taking execution time
 	//Search::search();
 
-	State starttest({Pos(1,4)},{Pos(1,5)});
-	State goaltest({Pos(1,3)},{Pos(1,4)});
+	State starttest({Pos(2,6)},{Pos(2,7)});
+	State goaltest({Pos(5,5)},{Pos(1,4)});
 	Search searchtest(&starttest, &goaltest);
 	searchtest.load_search_parameters(CFG_FILE);
 	searchtest.search();
+	// for (int i; i<searchtest.plan.size(); i++)
+	// 	printf("%d %d \n ",searchtest.plan[i]->boxes.i, searchtest.plan[i]->boxes.j);
 	//Presenting results on screen
 
 

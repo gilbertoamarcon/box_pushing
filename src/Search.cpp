@@ -50,11 +50,11 @@ void Search::load_search_parameters(char *filename){
 void Search::print_plan(){
 	int i = 0;
 	printf("Plan: \n");
-	stack<State> plan_cpy = plan;
+	vector<State> plan_cpy = plan;
 	while(!plan_cpy.empty()){
-		printf("%3d: %s",i++,plan_cpy.top().to_str());
-		State::display_world(&plan_cpy.top());
-		plan_cpy.pop();
+		printf("%3d: %s",i++,plan_cpy.back().to_str());
+		State::display_world(&plan_cpy.back());
+		plan_cpy.pop_back();
 	}
 	printf("\n");
 }
@@ -69,10 +69,10 @@ void Search::store_plan(char *filename){
 		return;
 	}
 
-	stack<State> plan_cpy = plan;
+	vector<State> plan_cpy = plan;
 	while(!plan_cpy.empty()){
-		fprintf(file,"%s",plan_cpy.top().to_str());
-		plan_cpy.pop();
+		fprintf(file,"%s",plan_cpy.back().to_str());
+		plan_cpy.pop_back();
 	}
 
 	// Done
@@ -175,7 +175,7 @@ void Search::search(){
 
 
 	// Final path position
-	plan.push(*state);
+	plan.push_back(*state);
 
 	// Defining path as a sequence of positions
 
@@ -188,7 +188,7 @@ void Search::search(){
 		state = state->parent;
 		
 		// Inserting position in the path vector
-		plan.push(*state);
+		plan.push_back(*state);
 	}
 
 	// Clearing memory
@@ -201,3 +201,9 @@ void Search::search(){
 	
 	planning_time = (double)(clock() - t_start)/(double)CLOCKS_PER_SEC;
 }
+
+void check_clashes(vector<vector<State>> plans){
+
+
+}
+
