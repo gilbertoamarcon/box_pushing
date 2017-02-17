@@ -150,7 +150,7 @@ void Map::set_Deadlocks(vector<Pos> goals){
 	//	printf("%d %d \n", deadlocks[i].i, deadlocks[i].j);
 
 	//DISABLE
-	//deadlocks = {};
+	deadlocks = {};
 
 }
 

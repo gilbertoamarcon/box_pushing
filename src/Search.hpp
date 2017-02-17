@@ -16,37 +16,42 @@ using std::list;
 class Search{
 
 	public:
-	
+		
+		Search(State *startnode, State *goalnode);
+
 		// Search results
-		static int num_exp_nodes;
-		static double planning_time;
+		int num_exp_nodes;
+		double planning_time;
 	
 		// Search parameters
-		static int max_iterations;
-		static int beamsize;
-		static float epsilon;
+		int max_iterations;
+		int beamsize;
+		float epsilon;
+
+		State *start;
+		State *goal;
 
 		// Plan
-		static stack<State> plan;
+		stack<State> plan;
 
 		// Loading configuration from file
-		static void load_search_parameters(char *filename);
+		void load_search_parameters(char *filename);
 
 		// Print plan
-		static void print_plan();
+		void print_plan();
 
 		// Store plan execution history
-		static void store_plan(char *filename);
+		void store_plan(char *filename);
 
 		// Search for a plan
-		static void search();
+		void search();
 
-		static void search_ind(State *start, State *goal);
+		void search_ind(State *start, State *goal);
 
 	private:
 
 		// Insert child to open list if correct conditions met
-		static void new_child(State *child, list<State*> *open, vector<State*> *closed);
+		void new_child(State *child, list<State*> *open, vector<State*> *closed);
 };
 
 #endif
