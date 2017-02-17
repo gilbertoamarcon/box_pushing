@@ -19,10 +19,20 @@ int main(int argc, char **argv){
 	printf("Goal: %s",	State::goal->to_str());
 	State::display_world(State::start);
 
-	// Running and taking execution time
-	Search::search();
+	State starttest({Pos(1,1)},{Pos(2,2)});
+	State goaltest({Pos(2,2)},{Pos(1,1)});
+	//State starttest("1,1:2,2\n");
+	//State goaltest("3,3");
+	//State *starttest = new State("2,2,2,6:3,7");
+	//State *goaltest = new State("3,3:1,1");
 
-	// Presenting results on screen
+	//printf("\n\n%d\n\n", starttest.boxes [0].i);
+	Search::search_ind(&starttest, &goaltest);
+
+	// Running and taking execution time
+	//Search::search();
+
+	//Presenting results on screen
 	if(Search::num_exp_nodes > 0){
 		printf("Plan found.\n");
 		printf("%d expanded nodes.\n",Search::num_exp_nodes);

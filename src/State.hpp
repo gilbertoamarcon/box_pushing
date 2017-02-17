@@ -46,6 +46,9 @@ class State{
 		// Constructor from parent
 		State(State *parent,string action_vector);
 
+		// Constructor with vectors
+		State(vector<Pos> boxvec, vector<Pos> robotvec);
+
 		// Constructor from string descriptor
 		State(char *str);
 		

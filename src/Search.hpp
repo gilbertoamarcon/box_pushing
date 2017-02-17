@@ -41,6 +41,8 @@ class Search{
 		// Search for a plan
 		static void search();
 
+		static void search_ind(State *start, State *goal);
+
 	private:
 
 		// Insert child to open list if correct conditions met

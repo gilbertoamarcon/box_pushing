@@ -20,6 +20,7 @@ State::State(State *parent,string action_vector){
 	this->g++;
 }
 
+// Constructor with string
 State::State(char *str){
 
 	this->parent = NULL;
@@ -30,6 +31,21 @@ State::State(char *str){
 	char *robots_str	= strtok(NULL,":");
 	Pos::parse(boxes_str,&boxes);
 	Pos::parse(robots_str,&robots);
+
+	// Initializing action vector with no action
+	for(Pos robot : this->robots)
+		action_vector.push_back('N');
+
+}
+
+// Constructor with vectors
+State::State(vector<Pos> boxvec, vector<Pos> robotvec){
+
+	this->parent = NULL;
+	this->g = 0;
+	this->f = 0;
+	this->boxes = boxvec;
+	this->robots = robotvec;
 
 	// Initializing action vector with no action
 	for(Pos robot : this->robots)
@@ -57,6 +73,7 @@ void State::load_problem(char *filename){
 	fclose(file);
 
 	// Initializing start and goal states
+
 	start	= new State(init);
 	goal	= new State(final);
 

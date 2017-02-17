@@ -192,3 +192,83 @@ void Search::search(){
 	planning_time = (double)(clock() - t_start)/(double)CLOCKS_PER_SEC;
 
 }
+
+
+void Search::search_ind(State* startstate, State* goalstate){
+
+	clock_t t_start = clock();
+
+	stack<State*> children;
+	list<State*> open;
+	vector<State*> closed;
+
+	State *state = NULL;
+
+	// Mark invalid positions for deadlock pruning
+	State::map->set_Corners();
+	State::map->set_Deadlocks(State::goal->boxes);
+
+	// Initializing open list
+	open.push_back(startstate);
+	
+	// Search loop
+	num_exp_nodes = 0;
+	for(;;){
+
+		// Checking if failure
+		if(num_exp_nodes++ == max_iterations || open.empty()){
+			num_exp_nodes = -1;
+			return;
+		}
+
+		// Visiting current node (least cost)
+		state = open.front();
+		open.pop_front();
+
+		// Inserting current node into the sorted closed list
+		vector<State*>::iterator it = closed.begin();
+		for(it = closed.begin(); it != closed.end(); it++){
+			int aux = State::compare((*it),state);
+			if(aux ==  0 || aux == 1) break;
+		}
+		closed.insert(it,state);
+
+		// Checking if goal found
+		if(state->is_goal(goalstate)) break;
+
+		// Expanding current node
+		state->expand(&children);
+		while(!children.empty()){
+			new_child(children.top(),&open,&closed);
+			children.pop();
+		}
+	}
+
+	// Final path position
+	plan.push(*state);
+
+	// Defining path as a sequence of positions
+	for(;;){
+
+		// Check if path completed
+		if(State::compare(state,State::start) == 0) break;
+
+		// Moving to parent node
+		state = state->parent;
+		
+		// Inserting position in the path vector
+		plan.push(*state);
+	}
+
+	// Clearing memory
+	while(!open.empty()){
+		delete open.front();
+		open.pop_front();
+	}
+	vector<State*>::iterator it = closed.begin();
+	for(it = closed.begin(); it != closed.end(); it++)
+		delete (*it);
+	
+	planning_time = (double)(clock() - t_start)/(double)CLOCKS_PER_SEC;
+
+}
