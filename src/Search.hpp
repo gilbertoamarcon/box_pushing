@@ -46,7 +46,7 @@ class Search{
 		// Search for a plan
 		void search();
 
-		void check_clashes(vector<stack<State>> plans);
+		static bool paths_free(vector<vector<State>> plans);
 
 	private:
 

@@ -64,6 +64,8 @@ class State{
 		// -1: this < state
 		static int compare(State *sta, State *stb);
 
+		static bool is_Clashing(State *sta, State *stb);
+
 		// Search for a state in a ordered state vector
 		static bool binary_search(vector<State*> *vec, State *state);
 

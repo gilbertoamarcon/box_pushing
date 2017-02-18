@@ -97,6 +97,23 @@ int State::compare(State *sta, State *stb){
 	return aux;
 }
 
+// Check if 2 states clash
+bool State::is_Clashing(State *sta, State *stb){
+	for (int i=0; i<sta->boxes.size(); i++){
+		if (vec_contains(stb->boxes, sta->boxes[i]))
+			return true;
+		if (vec_contains(stb->robots, sta->boxes[i]))
+			return true;
+	}
+	for (int i=0; i<sta->robots.size(); i++){
+		if (vec_contains(stb->boxes, sta->robots[i]))
+			return true;
+		if (vec_contains(stb->robots, sta->robots[i]))
+			return true;
+	}
+	return false;
+}
+
 // Binary state search
 bool State::binary_search(vector<State*> *vec, State *state){
 	int aux = 0;

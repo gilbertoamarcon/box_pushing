@@ -31,26 +31,46 @@ int main(int argc, char **argv){
 	// Running and taking execution time
 	//Search::search();
 
-	State starttest({Pos(2,6)},{Pos(2,7)});
-	State goaltest({Pos(5,5)},{Pos(1,4)});
-	Search searchtest(&starttest, &goaltest);
-	searchtest.load_search_parameters(CFG_FILE);
-	searchtest.search();
+	State start1({Pos(2,6)},{Pos(2,7)});
+	State goal1({Pos(5,5)},{Pos(1,4)});
+	Search search1(&start1, &goal1);
+	search1.load_search_parameters(CFG_FILE);
+	search1.search();
+	vector<State> plan1 = search1.plan;
+
+	State start2({Pos(1,2)},{Pos(3,3)});
+	State goal2({Pos(1,1)},{Pos(1,4)});
+	Search search2(&start2, &goal2);
+	search2.load_search_parameters(CFG_FILE);
+	search2.search();
+	vector<State> plan2 = search2.plan;
+
+	search1.print_plan();
+
+	search2.print_plan();
+
+
+	if (Search::paths_free({plan1,plan2})) 
+		printf("\nPaths Free\n");
+	else
+		printf("\nClashing\n");
+
+
 	// for (int i; i<searchtest.plan.size(); i++)
 	// 	printf("%d %d \n ",searchtest.plan[i]->boxes.i, searchtest.plan[i]->boxes.j);
 	//Presenting results on screen
 
 
-	if(searchtest.num_exp_nodes > 0){
-		printf("Plan found.\n");
-		printf("%d expanded nodes.\n",searchtest.num_exp_nodes);
-		printf("%d actions.\n",searchtest.plan.size());
-		printf("%f seconds.\n",searchtest.planning_time);
-		searchtest.print_plan();
-		searchtest.store_plan(PLAN_FILE);
-	}
-	else
-		printf("Plan failed.\n");
+	// if(searchtest.num_exp_nodes > 0){
+	// 	printf("Plan found.\n");
+	// 	printf("%d expanded nodes.\n",searchtest.num_exp_nodes);
+	// 	printf("%d actions.\n",searchtest.plan.size());
+	// 	printf("%f seconds.\n",searchtest.planning_time);
+	// 	searchtest.print_plan();
+	// 	searchtest.store_plan(PLAN_FILE);
+	// }
+	// else
+	// 	printf("Plan failed.\n");
 		
 
 	return 0;

@@ -1,5 +1,7 @@
 #include "Search.hpp"
 
+//#include <algorithm>
+
 // int Search::num_exp_nodes;
 // double Search::planning_time;
 
@@ -53,7 +55,7 @@ void Search::print_plan(){
 	vector<State> plan_cpy = plan;
 	while(!plan_cpy.empty()){
 		printf("%3d: %s",i++,plan_cpy.back().to_str());
-		State::display_world(&plan_cpy.back());
+		//State::display_world(&plan_cpy.back());
 		plan_cpy.pop_back();
 	}
 	printf("\n");
@@ -202,8 +204,21 @@ void Search::search(){
 	planning_time = (double)(clock() - t_start)/(double)CLOCKS_PER_SEC;
 }
 
-void check_clashes(vector<vector<State>> plans){
-
-
+bool Search::paths_free(vector<vector<State>> plans){
+	for(int i=0; i<plans.size(); i++){
+		for(int j=0; j<plans.size(); j++){
+			if (i<j){
+				vector<State> plan1 = plans[i];
+				vector<State> plan2 = plans[j];
+				for (int k=0; k<std::min(plan1.size(), plan2.size()); k++){
+					printf(plan1[k].to_str());
+					printf(plan2[k].to_str());
+					if (State::is_Clashing(&plan1[k], &plan2[k]))
+						return false;
+				}
+			}
+		}
+	}
+	return true;
 }
 
