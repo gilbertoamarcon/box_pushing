@@ -1,0 +1,4 @@
+for i in {9..30}
+do
+	./bin/main $i
+done

@@ -2,7 +2,7 @@ clear all;
 close all;
 clc;
 
-PROBLEM_NUM     = 1;
+PROBLEM_NUM     = 2;
 PROBLEM_PRE     = 'problem';
 MAP_FILE_POS	= '/map.csv';
 PLAN_FILE_POS	= '/plan.csv';
@@ -15,10 +15,15 @@ FIG_PATTERN     = '%s%03d.png';
 GOAL_APHA       = 0.20;
 DISP_PATH       = 1;
 
+
 BLOCK_SIZE      = 1000;
 
 % Map loading
 map = fliplr(csvread(MAP_FILE));
+BLOCK_SIZE      = 1000;
+
+% Map loading
+map = csvread(MAP_FILE);
 
 % Plan execution loading
 file = fileread(PLAN_FILE);

@@ -44,7 +44,7 @@ Map::Map(char * filename){
 		fgets(fileBuffer,BUFFER_SIZE,file);
 
 		aux = 0;
-		for(int j = cols-1; j >= 0; j--){
+		for(int j = 0; j < cols; j++){
 
 			map[coordinate2index(i,j)] = atoi(fileBuffer+aux);
 

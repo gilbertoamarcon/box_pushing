@@ -2,7 +2,7 @@ clear all;
 close all;
 clc;
 
-PROBLEM_NUM     = 1;
+PROBLEM_NUM     = 2;
 PROBLEM_PRE     = 'problem';
 FIG_PREFIX_POS	= '/figs/FIG';
 MOV_NAME_POS	= '/figs/MOV.avi';

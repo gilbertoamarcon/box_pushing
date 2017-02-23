@@ -13,7 +13,7 @@ int main(int argc, char **argv){
 	char map_file[BUFFER_SIZE];
 	char prob_file[BUFFER_SIZE];
 	char plan_file[BUFFER_SIZE];
-	int problem_number = 0;
+	int problem_number = 1;
 	if(argc >= 2)
 		problem_number = atoi(argv[1]);
 	sprintf(map_file,"%s%d%s",PROBLEM_PRE,problem_number,MAP_FILE);
