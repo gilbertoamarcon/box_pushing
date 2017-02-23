@@ -2,14 +2,20 @@ clear all;
 close all;
 clc;
 
-MAP_FILE    = 'files/map.csv';
-PLAN_FILE   = 'files/plan.csv';
-FIG_PREFIX	= 'figs/FIG';
-FIG_PATTERN	= '%s%03d.png';
-GOAL_APHA   = 0.20;
-DISP_PATH   = 1;
+PROBLEM_NUM     = 1;
+PROBLEM_PRE     = 'problem';
+MAP_FILE_POS	= '/map.csv';
+PLAN_FILE_POS	= '/plan.csv';
+FIG_PREFIX_POS	= '/figs/FIG';
 
-BLOCK_SIZE  = 1000;
+MAP_FILE        = sprintf('%s%d%s',PROBLEM_PRE,PROBLEM_NUM,MAP_FILE_POS);
+PLAN_FILE       = sprintf('%s%d%s',PROBLEM_PRE,PROBLEM_NUM,PLAN_FILE_POS);
+FIG_PREFIX      = sprintf('%s%d%s',PROBLEM_PRE,PROBLEM_NUM,FIG_PREFIX_POS);
+FIG_PATTERN     = '%s%03d.png';
+GOAL_APHA       = 0.20;
+DISP_PATH       = 1;
+
+BLOCK_SIZE      = 1000;
 
 % Map loading
 map = fliplr(csvread(MAP_FILE));
@@ -39,6 +45,7 @@ for i =1:num_steps
 end
 
 % Generating image sequences
+delete(strcat(FIG_PREFIX,'*'));
 for s=1:num_steps
     
     % Map
