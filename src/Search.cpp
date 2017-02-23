@@ -5,6 +5,7 @@ double Search::planning_time;
 
 int Search::max_iterations;
 float Search::epsilon;
+float Search::time_lim_secs;
 
 stack<State> Search::plan;
 
@@ -25,10 +26,12 @@ void Search::load_search_parameters(char *filename){
 	max_iterations = atoi(param_buffer);
 	while(param_buffer[i] != ',') i++; i++;
 	epsilon = atof(param_buffer+i);
+	while(param_buffer[i] != ',') i++; i++;
+	time_lim_secs = atof(param_buffer+i);
 
 	// Done
 	fclose(file);
-	printf("Parameters loaded: max_iterations: %d, epsilon: %f\n",max_iterations, epsilon);
+	printf("Parameters loaded: max_iterations: %d, epsilon: %f, time_lim_secs: %f\n",max_iterations, epsilon, time_lim_secs);
 
 	return;
 }
@@ -111,7 +114,7 @@ void Search::search(){
 	for(;;){
 
 		// Checking if failure
-		if(num_exp_nodes++ == max_iterations || open.empty()){
+		if(num_exp_nodes++ == max_iterations || open.empty() || (double)(clock() - t_start)/(double)CLOCKS_PER_SEC > time_lim_secs){
 			num_exp_nodes = -1;
 			return;
 		}

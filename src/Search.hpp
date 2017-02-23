@@ -18,6 +18,7 @@ class Search{
 	
 		// Search parameters
 		static int max_iterations;
+		static float time_lim_secs;
 		static float epsilon;
 
 		// Plan
