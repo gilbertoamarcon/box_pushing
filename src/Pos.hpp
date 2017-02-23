@@ -30,10 +30,10 @@ class Pos{
 		static bool compare(Pos a, Pos b);
 		
 		// Position constructor
-		Pos(int i, int j){
-			this->i = i;
-			this->j = j;
-		}
+		Pos(int i, int j);
+
+		// Position destructor
+		virtual ~Pos();
 
 		// Return string representation of position
 		void to_str(char *buffer);

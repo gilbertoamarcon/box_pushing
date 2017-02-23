@@ -20,7 +20,6 @@ State::State(State *parent,string action_vector){
 	this->g++;
 }
 
-// Constructor with string
 State::State(char *str){
 
 	this->parent = NULL;
@@ -38,20 +37,7 @@ State::State(char *str){
 
 }
 
-// Constructor with vectors
-State::State(vector<Pos> boxvec, vector<Pos> robotvec){
-
-	this->parent = NULL;
-	this->g = 0;
-	this->f = 0;
-	this->boxes = boxvec;
-	this->robots = robotvec;
-
-	// Initializing action vector with no action
-	for(Pos robot : this->robots)
-		action_vector.push_back('N');
-
-}
+State::~State(){}
 
 // Loading problem from file
 void State::load_problem(char *filename){
@@ -73,7 +59,6 @@ void State::load_problem(char *filename){
 	fclose(file);
 
 	// Initializing start and goal states
-
 	start	= new State(init);
 	goal	= new State(final);
 
@@ -95,26 +80,6 @@ int State::compare(State *sta, State *stb){
 	if(aux != 0) return aux;
 	aux = Pos::compare_vec(sta->robots,stb->robots);
 	return aux;
-}
-
-// Binary state search
-bool State::binary_search(vector<State*> *vec, State *state){
-	int aux = 0;
-	int m = 0;
-	int l = 0;
-	int r = vec->size()-1;
-	for(;;){
-		if(l > r)
-			return false;
-		m = floor((l+r)/2);
-		aux = State::compare(vec->at(m),state);
-		if(aux == 0)
-			return true;
-		if(aux ==  1)
-			r = m-1;
-		else
-			l = m+1;
-	}
 }
 
 // World print
@@ -170,13 +135,13 @@ int State::heuristic(State *goal){
 }
 
 // Write state representation to string
-char* State::to_str(){
+string State::to_str(){
 	strcpy(print_buffer,"");
 	for(Pos pos : boxes) pos.to_str(print_buffer);
 	strcat(print_buffer,":");
 	for(Pos pos : robots) pos.to_str(print_buffer);
 	strcat(print_buffer,"\n");
-	return print_buffer;
+	return string(print_buffer);
 }
 
 // Check if two states are equal
@@ -248,7 +213,8 @@ bool State::validate(){
 						temp_boxes.at(j).j--;
 
 						// Deadlock Checking
-						if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+ 						if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+
 						// Box-wall collision checking
 						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 
@@ -274,7 +240,8 @@ bool State::validate(){
 						temp_boxes.at(j).i++;
 
 						// Deadlock Checking
-						if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+ 						if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+
 						// Box-wall collision checking
 						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 
@@ -300,7 +267,8 @@ bool State::validate(){
 						temp_boxes.at(j).j++;
 
 						// Deadlock Checking
-						if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+ 						if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+
 						// Box-wall collision checking
 						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 
@@ -326,7 +294,8 @@ bool State::validate(){
 						temp_boxes.at(j).i--;
 
 						// Deadlock Checking
-						if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+ 						if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+
 						// Box-wall collision checking
 						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 

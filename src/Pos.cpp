@@ -1,5 +1,13 @@
 #include "Pos.hpp"
 
+Pos::Pos(int i, int j){
+	this->i = i;
+	this->j = j;
+}
+
+Pos::~Pos(){
+};
+
 // Parsing string into position vector
 void Pos::parse(char *str, vector<Pos> *pos){
 	if(str == NULL) return;

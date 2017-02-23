@@ -1,16 +1,11 @@
 #ifndef SEARCH_H
 #define SEARCH_H
 #include <ctime>
-#include <string>
-#include <vector>
 #include <stack>
-#include <list>
-#include "State.hpp"
+#include "Open.hpp"
+#include "Closed.hpp"
 
-using std::string;
-using std::vector;
 using std::stack;
-using std::list;
 
 // Searchition structure
 class Search{
@@ -23,7 +18,6 @@ class Search{
 	
 		// Search parameters
 		static int max_iterations;
-		static int beamsize;
 		static float epsilon;
 
 		// Plan
@@ -41,12 +35,10 @@ class Search{
 		// Search for a plan
 		static void search();
 
-		static void search_ind(State *start, State *goal);
-
 	private:
 
-		// Insert child to open list if correct conditions met
-		static void new_child(State *child, list<State*> *open, vector<State*> *closed);
+		// Insert child to open vector if correct conditions met
+		static void new_child(State *child, Open *open, Closed *closed);
 };
 
 #endif

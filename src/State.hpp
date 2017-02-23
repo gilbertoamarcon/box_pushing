@@ -5,13 +5,15 @@
 #include <string>
 #include <vector>
 #include <stack>
-#include "utils.hpp"
+#include <vector>
 #include "Map.hpp"
 #include "Pos.hpp"
+#include "utils.hpp"
 
 using std::string;
 using std::vector;
 using std::stack;
+using std::vector;
 
 // State class definition
 class State{
@@ -46,11 +48,10 @@ class State{
 		// Constructor from parent
 		State(State *parent,string action_vector);
 
-		// Constructor with vectors
-		State(vector<Pos> boxvec, vector<Pos> robotvec);
-
 		// Constructor from string descriptor
 		State(char *str);
+
+		virtual ~State();
 		
 		// Loading problem from file
 		static void load_problem(char *filename);
@@ -64,9 +65,6 @@ class State{
 		// -1: this < state
 		static int compare(State *sta, State *stb);
 
-		// Search for a state in a ordered state vector
-		static bool binary_search(vector<State*> *vec, State *state);
-
 		// World print
 		static void display_world(State *state);
 
@@ -74,7 +72,7 @@ class State{
 		int heuristic(State *goal);
 
 		// Write state representation to string
-		char* to_str();
+		string to_str();
 
 		// Return true if state equals goal
 		bool is_goal(State *goal);
@@ -95,7 +93,6 @@ class State{
 
 		// Check if a set of box coordinates would result in a deadlock
 		bool is_Deadlock(int i, int j);
-
 };
 
 #endif
