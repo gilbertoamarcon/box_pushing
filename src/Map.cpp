@@ -61,8 +61,6 @@ Map::Map(char * filename){
 
 	fclose(file);
 
-	printf("File '%s' loaded.\n",filename);
-
 	return;
 
 }
@@ -102,7 +100,6 @@ bool Map::is_Corner(int i, int j){
 }
 
 void Map::set_Corners(){
-	printf("Setting Corners\n");
 	corners = {};
 	for(int i=0; i<rows; i++)
 		for(int j=0; j<cols; j++)
@@ -111,7 +108,6 @@ void Map::set_Corners(){
 }
 
 void Map::set_Deadlocks(vector<Pos> goals){
-	printf("Setting Deadlocks\n");
 	deadlocks = {};
 	for(int m=0; m<corners.size(); m++){
 		for(int n=0; n<corners.size(); n++){

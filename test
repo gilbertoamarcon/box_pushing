@@ -1,4 +1,6 @@
-for i in {9..30}
+for i in {1..30}
 do
+	printf "Problem %d: " $i
 	./bin/main $i
+	printf "%d\n" $?
 done

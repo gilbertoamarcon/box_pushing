@@ -34,7 +34,7 @@ class Search{
 		static void store_plan(char *filename);
 
 		// Search for a plan
-		static void search();
+		static int search();
 
 	private:
 

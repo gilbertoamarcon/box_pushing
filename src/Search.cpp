@@ -31,7 +31,6 @@ void Search::load_search_parameters(char *filename){
 
 	// Done
 	fclose(file);
-	printf("Parameters loaded: max_iterations: %d, epsilon: %f, time_lim_secs: %f\n",max_iterations, epsilon, time_lim_secs);
 
 	return;
 }
@@ -67,7 +66,6 @@ void Search::store_plan(char *filename){
 
 	// Done
 	fclose(file);
-	printf("File '%s' stored.\n",filename);
 
 	return;
 }
@@ -92,7 +90,7 @@ void Search::new_child(State *child, Open *open, Closed *closed){
 }
 
 // Search for a plan
-void Search::search(){
+int Search::search(){
 
 	clock_t t_start = clock();
 
@@ -113,10 +111,22 @@ void Search::search(){
 	num_exp_nodes = 0;
 	for(;;){
 
-		// Checking if failure
-		if(num_exp_nodes++ == max_iterations || open.empty() || (double)(clock() - t_start)/(double)CLOCKS_PER_SEC > time_lim_secs){
+		// Failure: impossible problem
+		if(open.empty()){
 			num_exp_nodes = -1;
-			return;
+			return 1;
+		}
+
+		// Failure: time out
+		if((double)(clock() - t_start)/(double)CLOCKS_PER_SEC > time_lim_secs){
+			num_exp_nodes = -1;
+			return 2;
+		}
+
+		// Failure: exceeded node expansion limit
+		if(num_exp_nodes++ == max_iterations){
+			num_exp_nodes = -1;
+			return 3;
 		}
 
 		// Visiting current node (least cost)
@@ -153,5 +163,7 @@ void Search::search(){
 	}
 	
 	planning_time = (double)(clock() - t_start)/(double)CLOCKS_PER_SEC;
+
+	return 0;
 
 }
