@@ -8,7 +8,7 @@ FIG_PREFIX_POS	= '/figs/FIG';
 MOV_NAME_POS	= '/figs/MOV.avi';
  
 FIG_PATTERN     = '%s%03d.png';
-MOV_FRATE       = 4;
+MOV_FRATE       = 12;
 
 FIG_PREFIX      = sprintf('%s%d%s',PROBLEM_PRE,PROBLEM_NUM,FIG_PREFIX_POS);
 MOV_NAME        = sprintf('%s%d%s',PROBLEM_PRE,PROBLEM_NUM,MOV_NAME_POS);
