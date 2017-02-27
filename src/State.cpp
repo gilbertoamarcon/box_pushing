@@ -213,7 +213,7 @@ bool State::validate(){
 						temp_boxes.at(j).j--;
 
 						// Deadlock Checking
- 						if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+ 						// if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 
 						// Box-wall collision checking
 						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
@@ -240,7 +240,7 @@ bool State::validate(){
 						temp_boxes.at(j).i++;
 
 						// Deadlock Checking
- 						if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+ 						// if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 
 						// Box-wall collision checking
 						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
@@ -267,7 +267,7 @@ bool State::validate(){
 						temp_boxes.at(j).j++;
 
 						// Deadlock Checking
- 						if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+ 						// if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 
 						// Box-wall collision checking
 						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
@@ -294,7 +294,7 @@ bool State::validate(){
 						temp_boxes.at(j).i--;
 
 						// Deadlock Checking
- 						if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+ 						// if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 
 						// Box-wall collision checking
 						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;

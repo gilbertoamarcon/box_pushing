@@ -1,6 +1,0 @@
-for i in {1..23}
-do
-	printf "Problem %d: " $i
-	./bin/main $i $1
-	printf "%d\n" $?
-done
