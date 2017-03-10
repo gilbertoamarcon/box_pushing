@@ -51,6 +51,9 @@ class State{
 		// Constructor from string descriptor
 		State(char *str);
 
+		// Constructor with vectors
+		State(vector<Pos> boxvec, vector<Pos> robotvec);
+
 		virtual ~State();
 		
 		// Loading problem from file
@@ -67,6 +70,8 @@ class State{
 
 		// World print
 		static void display_world(State *state);
+
+		static bool is_Clashing(State *sta, State *stb);
 
 		// Heuristic distance to goal
 		int heuristic(State *goal);

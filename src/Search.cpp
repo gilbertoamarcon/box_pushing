@@ -1,13 +1,21 @@
 #include "Search.hpp"
 
-int Search::num_exp_nodes;
-double Search::planning_time;
+// int Search::num_exp_nodes;
+// double Search::planning_time;
 
-int Search::max_iterations;
-float Search::epsilon;
-float Search::time_lim_secs;
+// int Search::max_iterations;
+// float Search::epsilon;
+// float Search::time_lim_secs;
 
-stack<State> Search::plan;
+// stack<State> Search::plan;
+
+
+Search::Search(State *startnode, State *goalnode){
+
+	start = startnode;
+	goal = goalnode;
+
+}
 
 // Loading problem from file
 void Search::load_search_parameters(char *filename){
@@ -39,11 +47,11 @@ void Search::load_search_parameters(char *filename){
 void Search::print_plan(){
 	int i = 0;
 	printf("Plan: \n");
-	stack<State> plan_cpy = plan;
+	vector<State> plan_cpy = plan;
 	while(!plan_cpy.empty()){
-		printf("%3d: %s",i++,plan_cpy.top().to_str().c_str());
-		State::display_world(&plan_cpy.top());
-		plan_cpy.pop();
+		printf("%3d: %s",i++,plan_cpy.back().to_str().c_str());
+		State::display_world(&plan_cpy.back());
+		plan_cpy.pop_back();
 	}
 	printf("\n");
 }
@@ -58,10 +66,10 @@ void Search::store_plan(char *filename){
 		return;
 	}
 
-	stack<State> plan_cpy = plan;
+	vector<State> plan_cpy = plan;
 	while(!plan_cpy.empty()){
-		fprintf(file,"%s",plan_cpy.top().to_str().c_str());
-		plan_cpy.pop();
+		fprintf(file,"%s",plan_cpy.back().to_str().c_str());
+		plan_cpy.pop_back();
 	}
 
 	// Done
@@ -101,7 +109,7 @@ int Search::search(){
 	State *state = NULL;
 
 	// Mark invalid positions for deadlock pruning
-	State::map->set_Corners();
+	State::map->set_Corners(State::goal->boxes);
 	State::map->set_Deadlocks(State::goal->boxes);
 
 	// Initializing open vector
@@ -147,7 +155,7 @@ int Search::search(){
 	}
 
 	// Final path position
-	plan.push(*state);
+	plan.push_back(*state);
 
 	// Defining path as a sequence of positions
 	for(;;){
@@ -159,11 +167,29 @@ int Search::search(){
 		state = state->parent;
 		
 		// Inserting position in the path vector
-		plan.push(*state);
+		plan.push_back(*state);
 	}
 	
 	planning_time = (double)(clock() - t_start)/(double)CLOCKS_PER_SEC;
 
 	return 0;
 
+}
+
+bool Search::paths_free(vector<vector<State>> plans){
+	for(int i=0; i<plans.size(); i++){
+		for(int j=0; j<plans.size(); j++){
+			if (i<j){
+				vector<State> plan1 = plans[i];
+				vector<State> plan2 = plans[j];
+				for (int k=0; k<std::min(plan1.size(), plan2.size()); k++){
+					printf(plan1[k].to_str().c_str());
+					printf(plan2[k].to_str().c_str());
+					if (State::is_Clashing(&plan1[k], &plan2[k]))
+						return false;
+				}
+			}
+		}
+	}
+	return true;
 }

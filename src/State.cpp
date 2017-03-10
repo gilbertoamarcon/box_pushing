@@ -37,6 +37,21 @@ State::State(char *str){
 
 }
 
+// Constructor with vectors
+State::State(vector<Pos> boxvec, vector<Pos> robotvec){
+
+	this->parent = NULL;
+	this->g = 0;
+	this->f = 0;
+	this->boxes = boxvec;
+	this->robots = robotvec;
+
+	// Initializing action vector with no action
+	for(Pos robot : this->robots)
+		action_vector.push_back('N');
+
+}
+
 State::~State(){}
 
 // Loading problem from file
@@ -68,6 +83,23 @@ void State::load_problem(char *filename){
 // Load map file
 void State::load_map(char *filename){
 	map = new Map(filename);
+}
+
+// Check if 2 states clash
+bool State::is_Clashing(State *sta, State *stb){
+	for (int i=0; i<sta->boxes.size(); i++){
+		if (vec_contains(stb->boxes, sta->boxes[i]))
+			return true;
+		if (vec_contains(stb->robots, sta->boxes[i]))
+			return true;
+	}
+	for (int i=0; i<sta->robots.size(); i++){
+		if (vec_contains(stb->boxes, sta->robots[i]))
+			return true;
+		if (vec_contains(stb->robots, sta->robots[i]))
+			return true;
+	}
+	return false;
 }
 
 // Compare with two states
@@ -213,7 +245,7 @@ bool State::validate(){
 						temp_boxes.at(j).j--;
 
 						// Deadlock Checking
- 						// if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+ 						 if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 
 						// Box-wall collision checking
 						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
@@ -240,7 +272,7 @@ bool State::validate(){
 						temp_boxes.at(j).i++;
 
 						// Deadlock Checking
- 						// if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+ 						 if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 
 						// Box-wall collision checking
 						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
@@ -267,7 +299,7 @@ bool State::validate(){
 						temp_boxes.at(j).j++;
 
 						// Deadlock Checking
- 						// if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+ 						 if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 
 						// Box-wall collision checking
 						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
@@ -294,7 +326,7 @@ bool State::validate(){
 						temp_boxes.at(j).i--;
 
 						// Deadlock Checking
- 						// if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+ 						 if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 
 						// Box-wall collision checking
 						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;

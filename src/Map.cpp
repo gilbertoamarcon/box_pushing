@@ -99,11 +99,11 @@ bool Map::is_Corner(int i, int j){
 	return false;
 }
 
-void Map::set_Corners(){
+void Map::set_Corners(vector<Pos> goals){
 	corners = {};
 	for(int i=0; i<rows; i++)
 		for(int j=0; j<cols; j++)
-			if(is_Corner(i, j))
+			if(is_Corner(i, j) && !vec_contains(goals, Pos(i, j)))
 				corners.push_back(Pos(i, j));
 }
 
@@ -137,6 +137,10 @@ void Map::set_Deadlocks(vector<Pos> goals){
 	for (int i=0;i<corners.size();i++)
 		if(!vec_contains(deadlocks, corners[i]) && !vec_contains(goals, corners[i]))
 			deadlocks.push_back(corners[i]);
+
+	//Print all deadlocks
+	for (int i=0;i<deadlocks.size();i++)
+		printf("%d %d \n", deadlocks[i].i, deadlocks[i].j);
 
 }
 
