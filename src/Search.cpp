@@ -12,8 +12,14 @@
 
 Search::Search(State *startnode, State *goalnode){
 
+	printf("A: %d ", start);
+	printf("B: %d ", startnode);
 	start = startnode;
 	goal = goalnode;
+	printf("A: %d ", start);
+	printf("B: %d ", startnode);
+	printf(start->to_str().c_str());
+	printf(goal->to_str().c_str());
 
 }
 
@@ -111,9 +117,13 @@ int Search::search(){
 	// Mark invalid positions for deadlock pruning
 	State::map->set_Corners(State::goal->boxes);
 	State::map->set_Deadlocks(State::goal->boxes);
+	// printf(State::goal->to_str().c_str());
+	// printf(State::start->to_str().c_str());
+	// printf(start->to_str().c_str());
+	// printf(goal->to_str().c_str());
 
 	// Initializing open vector
-	open.insert(State::start);
+	open.insert(start);
 
 	// Search loop
 	num_exp_nodes = 0;
@@ -144,7 +154,7 @@ int Search::search(){
 		closed.insert(state);
 
 		// Checking if goal found
-		if(state->is_goal(State::goal)) break;
+		if(state->is_goal(goal)) break;
 
 		// Expanding current node
 		state->expand(&children);
@@ -161,7 +171,7 @@ int Search::search(){
 	for(;;){
 
 		// Check if path completed
-		if(State::compare(state,State::start) == 0) break;
+		if(State::compare(state,start) == 0) break;
 
 		// Moving to parent node
 		state = state->parent;

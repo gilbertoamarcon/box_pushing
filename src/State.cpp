@@ -38,7 +38,7 @@ State::State(char *str){
 }
 
 // Constructor with vectors
-State::State(vector<Pos> boxvec, vector<Pos> robotvec){
+State::State(vector<Pos> boxvec, vector<Pos> robotvec = {}){
 
 	this->parent = NULL;
 	this->g = 0;

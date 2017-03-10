@@ -25,16 +25,18 @@ int main(int argc, char **argv){
 	sprintf(map_file,"%s%d%s",PROBLEM_PRE,problem_number,MAP_FILE);
 	sprintf(prob_file,"%s%d%s",PROBLEM_PRE,problem_number,PROB_FILE);
 	sprintf(plan_file,"%s%d%s",PROBLEM_PRE,problem_number,PLAN_FILE);
-		
-	Search search1(State::start, State::goal);
-	// Search configuration parameters
-	search1.load_search_parameters(CFG_FILE);
 
 	// Loading obstacle map
 	State::load_map(map_file);
 
 	// Loading problem
 	State::load_problem(prob_file);
+
+	Search search1(State::start, State::goal);
+	// Search configuration parameters
+	search1.load_search_parameters(CFG_FILE);
+
+
 	if(verbose){
 		printf("Start: %s",	State::start->to_str().c_str());
 		printf("Goal: %s",	State::goal->to_str().c_str());

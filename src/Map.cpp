@@ -139,8 +139,8 @@ void Map::set_Deadlocks(vector<Pos> goals){
 			deadlocks.push_back(corners[i]);
 
 	//Print all deadlocks
-	for (int i=0;i<deadlocks.size();i++)
-		printf("%d %d \n", deadlocks[i].i, deadlocks[i].j);
+	// for (int i=0;i<deadlocks.size();i++)
+	// 	printf("%d %d \n", deadlocks[i].i, deadlocks[i].j);
 
 }
 
