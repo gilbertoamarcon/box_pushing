@@ -54,6 +54,9 @@ class State{
 		// Constructor with vectors
 		State(vector<Pos> boxvec, vector<Pos> robotvec);
 
+		// Constructor with no parameters
+		State();
+
 		virtual ~State();
 		
 		// Loading problem from file
@@ -73,6 +76,8 @@ class State{
 
 		static bool is_Clashing(State *sta, State *stb);
 
+		static State* combine_states(vector<State*>);
+
 		// Heuristic distance to goal
 		int heuristic(State *goal);
 
@@ -81,6 +86,8 @@ class State{
 
 		// Return true if state equals goal
 		bool is_goal(State *goal);
+
+		bool is_goal(State *goal, bool robotCheck);
 
 		// Return stack with children states
 		void expand(stack<State*> *children);

@@ -38,7 +38,7 @@ State::State(char *str){
 }
 
 // Constructor with vectors
-State::State(vector<Pos> boxvec, vector<Pos> robotvec = {}){
+State::State(vector<Pos> boxvec, vector<Pos> robotvec){
 
 	this->parent = NULL;
 	this->g = 0;
@@ -49,6 +49,20 @@ State::State(vector<Pos> boxvec, vector<Pos> robotvec = {}){
 	// Initializing action vector with no action
 	for(Pos robot : this->robots)
 		action_vector.push_back('N');
+
+}
+
+// Constructor with no parameters
+State::State(){
+
+	this->parent = NULL;
+	this->g = 0;
+	this->f = 0;
+	this->boxes = {};
+	this->robots = {};
+
+	// Initializing action vector with no action
+	action_vector.push_back('N');
 
 }
 
@@ -176,9 +190,26 @@ string State::to_str(){
 	return string(print_buffer);
 }
 
+State* State::combine_states(vector<State*> vec){
+	State *combined = new State();
+	for(int i=0;i<vec.size();i++){
+		combined->boxes.insert(combined->boxes.end(), vec[i]->boxes.begin(), vec[i]->boxes.end()); 
+		combined->robots.insert(combined->robots.end(), vec[i]->robots.begin(), vec[i]->robots.end()); 
+	}
+	return combined;
+}
+
 // Check if two states are equal
 bool State::is_goal(State *goal){
 	return Pos::compare_vec(boxes,goal->boxes) == 0;
+}
+
+// Check if two states are equal
+bool State::is_goal(State *goal, bool robotCheck){
+	if (robotCheck)
+		return Pos::compare_vec(boxes,goal->boxes) == 0 && Pos::compare_vec(robots,goal->robots) == 0;
+	else
+		return Pos::compare_vec(boxes,goal->boxes) == 0;
 }
 
 // Return stack with all valid children states

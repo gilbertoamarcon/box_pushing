@@ -1,6 +1,5 @@
 #include "Map.hpp"
 #include "Pos.hpp"
-#include "timeIt.cpp"
 #include "utils.hpp"
 
 Map::Map(char * filename){

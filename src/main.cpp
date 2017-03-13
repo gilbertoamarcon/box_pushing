@@ -49,7 +49,7 @@ int main(int argc, char **argv){
 	if(search1.num_exp_nodes > 0)
 		search1.store_plan(plan_file);
 
-	// Presenting results on screen
+	// Presenting results on screen	
 	if(!verbose) return result;
 	if(search1.num_exp_nodes > 0){
 			printf("Plan found.\n");
