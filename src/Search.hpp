@@ -62,9 +62,11 @@ class Search{
 		// Search for a plan
 		int search();
 
-		int searchDecoupled();
+		int searchDecoupled1();
 
 		bool checkReducedSolution(State* cur);
+
+		void copySearchParameters(Search* s);
 
 		static void print_plan(vector<State> p);
 
@@ -72,7 +74,9 @@ class Search{
 
 		static vector<State*> returnClashes(vector<vector<State>> plans);
 
-		static clashInfo returnClashesStruct(vector<vector<State>> plans);
+		static clashInfo returnClashesStruct(vector<vector<State>> plans, int bt);
+
+		static vector<State> mergePlans(Search* s1, Search* s2, Search* sc, clashInfo c);
 
 	private:
 
