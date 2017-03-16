@@ -101,7 +101,7 @@ int Search::search(){
 	State *state = NULL;
 
 	// Mark invalid positions for deadlock pruning
-	State::map->set_Corners();
+	State::map->set_Corners(State::goal->boxes);
 	State::map->set_Deadlocks(State::goal->boxes);
 
 	// Initializing open vector

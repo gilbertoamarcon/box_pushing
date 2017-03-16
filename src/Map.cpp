@@ -1,6 +1,5 @@
 #include "Map.hpp"
 #include "Pos.hpp"
-#include "timeIt.cpp"
 #include "utils.hpp"
 
 Map::Map(char * filename){
@@ -99,11 +98,11 @@ bool Map::is_Corner(int i, int j){
 	return false;
 }
 
-void Map::set_Corners(){
+void Map::set_Corners(vector<Pos> goals){
 	corners = {};
 	for(int i=0; i<rows; i++)
 		for(int j=0; j<cols; j++)
-			if(is_Corner(i, j))
+			if(is_Corner(i, j) && !vec_contains(goals, Pos(i, j)))
 				corners.push_back(Pos(i, j));
 }
 
