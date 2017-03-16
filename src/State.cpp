@@ -37,35 +37,6 @@ State::State(char *str){
 
 }
 
-// Constructor with vectors
-State::State(vector<Pos> boxvec, vector<Pos> robotvec){
-
-	this->parent = NULL;
-	this->g = 0;
-	this->f = 0;
-	this->boxes = boxvec;
-	this->robots = robotvec;
-
-	// Initializing action vector with no action
-	for(Pos robot : this->robots)
-		action_vector.push_back('N');
-
-}
-
-// Constructor with no parameters
-State::State(){
-
-	this->parent = NULL;
-	this->g = 0;
-	this->f = 0;
-	this->boxes = {};
-	this->robots = {};
-
-	// Initializing action vector with no action
-	action_vector.push_back('N');
-
-}
-
 State::~State(){}
 
 // Loading problem from file
@@ -97,23 +68,6 @@ void State::load_problem(char *filename){
 // Load map file
 void State::load_map(char *filename){
 	map = new Map(filename);
-}
-
-// Check if 2 states clash
-bool State::is_Clashing(State *sta, State *stb){
-	for (int i=0; i<sta->boxes.size(); i++){
-		if (vec_contains(stb->boxes, sta->boxes[i]))
-			return true;
-		if (vec_contains(stb->robots, sta->boxes[i]))
-			return true;
-	}
-	for (int i=0; i<sta->robots.size(); i++){
-		if (vec_contains(stb->boxes, sta->robots[i]))
-			return true;
-		if (vec_contains(stb->robots, sta->robots[i]))
-			return true;
-	}
-	return false;
 }
 
 // Compare with two states
@@ -190,26 +144,9 @@ string State::to_str(){
 	return string(print_buffer);
 }
 
-State* State::combine_states(vector<State*> vec){
-	State *combined = new State();
-	for(int i=0;i<vec.size();i++){
-		combined->boxes.insert(combined->boxes.end(), vec[i]->boxes.begin(), vec[i]->boxes.end()); 
-		combined->robots.insert(combined->robots.end(), vec[i]->robots.begin(), vec[i]->robots.end()); 
-	}
-	return combined;
-}
-
 // Check if two states are equal
 bool State::is_goal(State *goal){
 	return Pos::compare_vec(boxes,goal->boxes) == 0;
-}
-
-// Check if two states are equal
-bool State::is_goal(State *goal, bool robotCheck){
-	if (robotCheck)
-		return Pos::compare_vec(boxes,goal->boxes) == 0 && Pos::compare_vec(robots,goal->robots) == 0;
-	else
-		return Pos::compare_vec(boxes,goal->boxes) == 0;
 }
 
 // Return stack with all valid children states
@@ -276,7 +213,7 @@ bool State::validate(){
 						temp_boxes.at(j).j--;
 
 						// Deadlock Checking
- 						 if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+ 						// if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 
 						// Box-wall collision checking
 						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
@@ -303,7 +240,7 @@ bool State::validate(){
 						temp_boxes.at(j).i++;
 
 						// Deadlock Checking
- 						 if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+ 						// if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 
 						// Box-wall collision checking
 						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
@@ -330,7 +267,7 @@ bool State::validate(){
 						temp_boxes.at(j).j++;
 
 						// Deadlock Checking
- 						 if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+ 						// if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 
 						// Box-wall collision checking
 						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
@@ -357,7 +294,7 @@ bool State::validate(){
 						temp_boxes.at(j).i--;
 
 						// Deadlock Checking
- 						 if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
+ 						// if(is_Deadlock(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;
 
 						// Box-wall collision checking
 						if(map->get_value(temp_boxes.at(j).i,temp_boxes.at(j).j)) return false;

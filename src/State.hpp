@@ -51,12 +51,6 @@ class State{
 		// Constructor from string descriptor
 		State(char *str);
 
-		// Constructor with vectors
-		State(vector<Pos> boxvec, vector<Pos> robotvec);
-
-		// Constructor with no parameters
-		State();
-
 		virtual ~State();
 		
 		// Loading problem from file
@@ -74,10 +68,6 @@ class State{
 		// World print
 		static void display_world(State *state);
 
-		static bool is_Clashing(State *sta, State *stb);
-
-		static State* combine_states(vector<State*>);
-
 		// Heuristic distance to goal
 		int heuristic(State *goal);
 
@@ -86,8 +76,6 @@ class State{
 
 		// Return true if state equals goal
 		bool is_goal(State *goal);
-
-		bool is_goal(State *goal, bool robotCheck);
 
 		// Return stack with children states
 		void expand(stack<State*> *children);

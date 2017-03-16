@@ -28,7 +28,7 @@ class Map{
 		bool is_Corner(int i, int j);
 		bool is_Deadlock(int i, int j);
 		bool evaluate_Corner_Pair(Pos c1, Pos c2, vector<Pos> goals);
-		void set_Corners(vector<Pos> goals);
+		void set_Corners();
 		void set_Deadlocks(vector<Pos> goals);
 
 

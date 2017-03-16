@@ -12,7 +12,7 @@ int main(int argc, char **argv){
 	// Line arguments
 	int result		= -1;
 	int verbose		= 0;
-	int problem_number = 26;
+	int problem_number = 1;
 	for(int i = 1; i < argc; i++){
 		if(argv[i][0] == '-' && argv[i][1] == 'v') verbose	= 1; else
 		problem_number = atoi(argv[i]);
@@ -25,18 +25,15 @@ int main(int argc, char **argv){
 	sprintf(map_file,"%s%d%s",PROBLEM_PRE,problem_number,MAP_FILE);
 	sprintf(prob_file,"%s%d%s",PROBLEM_PRE,problem_number,PROB_FILE);
 	sprintf(plan_file,"%s%d%s",PROBLEM_PRE,problem_number,PLAN_FILE);
+		
+	// Search configuration parameters
+	Search::load_search_parameters(CFG_FILE);
 
 	// Loading obstacle map
 	State::load_map(map_file);
 
 	// Loading problem
 	State::load_problem(prob_file);
-
-	Search search1(State::start, State::goal);
-	// Search configuration parameters
-	search1.load_search_parameters(CFG_FILE);
-
-
 	if(verbose){
 		printf("Start: %s",	State::start->to_str().c_str());
 		printf("Goal: %s",	State::goal->to_str().c_str());
@@ -44,19 +41,19 @@ int main(int argc, char **argv){
 	}
 
 	// Running and taking execution time
-	result = search1.search();
+	result = Search::search();
 
-	if(search1.num_exp_nodes > 0)
-		search1.store_plan(plan_file);
+	if(Search::num_exp_nodes > 0)
+		Search::store_plan(plan_file);
 
-	// Presenting results on screen	
+	// Presenting results on screen
 	if(!verbose) return result;
-	if(search1.num_exp_nodes > 0){
+	if(Search::num_exp_nodes > 0){
 			printf("Plan found.\n");
-			printf("%d expanded nodes.\n",search1.num_exp_nodes);
-			printf("%d actions.\n",search1.plan.size());
-			printf("%f seconds.\n",search1.planning_time);
-			search1.print_plan();
+			printf("%d expanded nodes.\n",Search::num_exp_nodes);
+			printf("%d actions.\n",Search::plan.size());
+			printf("%f seconds.\n",Search::planning_time);
+			Search::print_plan();
 	}
 	else
 		printf("Plan failed.\n");
