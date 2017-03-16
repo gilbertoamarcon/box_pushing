@@ -42,8 +42,11 @@ class Search{
 		bool checkRobots = false;
 		bool coupled = false;
 
+		vector<vector<State>> aux_plan_vec;
+
 		State *start;
 		State *goal;
+		State *reducedGoal;
 
 
 
@@ -62,7 +65,9 @@ class Search{
 		// Search for a plan
 		int search();
 
-		int searchDecoupled1();
+		void searchDecoupled1();
+
+		void searchDecoupled2();
 
 		bool checkReducedSolution(State* cur);
 
@@ -78,6 +83,7 @@ class Search{
 
 		static vector<State> mergePlans(Search* s1, Search* s2, Search* sc, clashInfo c);
 
+		static vector<State> mergePlans2(Search* s1, Search* s2, Search* sc, clashInfo c);
 	private:
 
 		// Insert child to open vector if correct conditions met

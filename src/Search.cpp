@@ -200,7 +200,7 @@ int Search::search(){
 }
 
 // Search for a plan
-int Search::searchDecoupled1(){
+void Search::searchDecoupled1(){
 	//SPLICE SEARCH
 	printf("Distributing Tasks...\n");
 	State *st1 = new State({start->boxes[0]},{start->robots[0]});
@@ -231,10 +231,6 @@ int Search::searchDecoupled1(){
 	for(int i=1;;i++){
 	printf("Checking Collision Set... BT: %d \n", i);
 	c = Search::returnClashesStruct({s1->plan,s2->plan}, i);
-
-	// printf("CLASHING START_END: %d %d \n",c.t_start,c.t_end);
-	//DO COUPLED SOLUTION IF CLASHING
-
 	if (c.clashes.size() == 0)
 		printf("No clashes between individual plans, executing paths...\n");
 	else
@@ -258,6 +254,168 @@ int Search::searchDecoupled1(){
 	plan = Search::mergePlans(s1, s2, sc, c);
 }
 
+// Search for a plan
+void Search::searchDecoupled2(){
+	//SPLICE SEARCH
+	printf("Distributing Tasks...\n");
+	State *st1 = new State({start->boxes[0]},{start->robots[0]});
+	State *st2 = new State({start->boxes[1]},{start->robots[1]});
+	State *go1 = new State();
+	State *go2 = new State();
+	go1->boxes.push_back(goal->boxes[0]);
+	go2->boxes.push_back(goal->boxes[1]);
+	if (checkRobots){
+		go1->robots.push_back(goal->robots[0]);
+		go2->robots.push_back(goal->robots[1]);
+	}
+
+	//SEARCH INDIVIDUALLY
+	printf("Searching Individually...\n");
+
+	Search *s1 = new Search(st1, go1);
+	copySearchParameters(s1);
+	s1->search();
+
+	Search *s2 = new Search(st2, go2);
+	copySearchParameters(s2);
+	s2->search();
+
+	//CHECK COLLISION SET
+	clashInfo c;
+	Search *sc = new Search(State::start, State::goal);
+	for(int i=1;;i++){
+	printf("Checking Collision Set... BT: %d \n", i);
+	c = Search::returnClashesStruct({s1->plan,s2->plan}, i);
+	if (c.clashes.size() == 0)
+		printf("No clashes between individual plans, executing paths...\n");
+	else
+		printf("Doing local coupled search...\n");
+		sc->start = c.clashes[0];
+		sc->goal = c.clashes[1];
+		sc->reducedGoal = State::goal;
+		printf(c.clashes[0]->to_str().c_str());
+		printf(c.clashes[1]->to_str().c_str());
+		State::display_world(sc->start);
+		State::display_world(sc->goal);
+		State::display_world(sc->reducedGoal);
+		// Search sc(c.clashes[0], god);
+		copySearchParameters(sc);
+		sc->checkRobots = true;
+		sc->coupled = true;
+
+		if(sc->search()==0){
+			sc->print_plan();
+			break;
+		}
+	}
+
+	// Search::print_plan(sc->aux_plan_vec[0]);
+	// Search::print_plan(sc->aux_plan_vec[1]);
+
+
+	// plan = Search::mergePlans2(s1, s2, sc, c);
+}
+
+vector<State> Search::mergePlans2(Search* s1, Search* s2, Search* sc, clashInfo c){
+	//ASSUMES 2 PATHS
+	//TIE ALL THE RESULTING PATHS
+	// printf("Displaying Final Path...\n");
+	// printf("%d %d %d %d",s1->plan.begin(),s1->plan.begin(),c.t_start,c.t_end);
+
+	vector<State> plan1 = sc->aux_plan_vec[0];
+	vector<State> plan2 = sc->aux_plan_vec[1];
+
+	// printf("IND path1 ...\n");
+	// 	Search::print_plan(s1->plan);
+	// printf("IND path2 ...\n");
+	// 	Search::print_plan(s2->plan);
+	// printf("UNTOUCHED1...\n");
+	// 	Search::print_plan(plan1);
+	// printf("UNTOUCHED2...\n");
+	// 	Search::print_plan(plan2);
+	// printf("Coupled path...\n");
+	// 	Search::print_plan(sc->plan);
+
+
+
+	vector<State> p1(s1->plan.begin() + c.t_start + 1, s1->plan.end()); 
+	std::reverse(p1.begin(), p1.end());
+	vector<State> p2(s2->plan.begin() + c.t_start + 1, s2->plan.end()); 	
+	std::reverse(p2.begin(), p2.end());
+	std::reverse(plan1.begin(), plan1.end()); 
+	std::reverse(plan2.begin(), plan2.end());
+	vector<State> p5(sc->plan);
+	std::reverse(p5.begin(), p5.end());
+
+
+	// printf("IND path1 ...\n");
+	// 	Search::print_plan(p1);
+	// printf("IND path2 ...\n");
+	// 	Search::print_plan(p2);
+	// printf("IND path1_end...\n");
+	// 	Search::print_plan(plan1);
+	// printf("IND path2_end...\n");
+	// 	Search::print_plan(plan2);
+	// printf("Coupled path...\n");
+	// 	Search::print_plan(p5);
+
+	// printf("IND path1 ...\n");
+	// for (int i=0;i<p1.size();i++)
+	// 	printf("%s \n",p1[i].to_str().c_str());
+	// printf("IND path2 ...\n");
+	// for (int i=0;i<p2.size();i++)
+	// 	printf("%s \n",p2[i].to_str().c_str());
+	// printf("IND path1_end...\n");
+	// for (int i=0;i<p3.size();i++)
+	// 	printf("%s \n",p3[i].to_str().c_str());
+	// printf("IND path2_end...\n");
+	// for (int i=0;i<p4.size();i++)
+	// 	printf("%s \n",p4[i].to_str().c_str());
+	// printf("Coupled mid path...\n");
+	// for (int i=0;i<p5.size();i++)
+	// 	printf("%s \n",p5[i].to_str().c_str());
+
+	printf("Merged INDV PATHS1...\n");
+	// MERGE INDV PATHS
+	int min1 = std::min(p1.size(), p2.size());
+	vector<State> pp1 = {};
+	for (int i=0;i<min1;i++)
+		pp1.push_back(*State::combine_states({&(p1[i]),&(p2[i])}));
+	if (p1.size()>p2.size()){
+		for (int i=min1;i<min1+p1.size()-p2.size();i++)
+			pp1.push_back(*State::combine_states({&(p1[i]),&(p2.back())}));
+	}
+	else{
+		for (int i=min1;i<min1+p2.size()-p1.size();i++)
+			pp1.push_back(*State::combine_states({&(p1.back()),&(p2[i])}));
+	}
+
+	for (int i=0;i<pp1.size();i++)
+		printf("%s \n",pp1[i].to_str().c_str());
+
+	// printf("Merged INDV PATHS2...\n");
+	//MERGE INDV PATHS
+	int max2 = std::max(plan1.size(), plan2.size());
+	vector<State> pp2 = {};
+	for (int i=0;i<max2;i++)
+		pp2.push_back(*State::combine_states({&(plan1[i]),&(plan2[i])}));
+
+	// for (int i=0;i<pp2.size();i++)
+	// 	printf("%s \n",pp2[i].to_str().c_str());
+
+	//ACTUAL MERGING
+	pp1.insert(pp1.end(), p5.begin(), p5.end()); 
+	pp1.insert(pp1.end(), pp2.begin(), pp2.end()); 
+
+	// // printf("FINAL PATH...\n");
+	// // for (int i=0;i<pp1.size();i++)
+	// // 	printf("%s \n",pp1[i].to_str().c_str());
+
+	std::reverse(pp1.begin(), pp1.end());
+	
+	return pp1;
+}
+
 vector<State> Search::mergePlans(Search* s1, Search* s2, Search* sc, clashInfo c){
 	//ASSUMES 2 PATHS
 	//TIE ALL THE RESULTING PATHS
@@ -274,31 +432,39 @@ vector<State> Search::mergePlans(Search* s1, Search* s2, Search* sc, clashInfo c
 	vector<State> p5(sc->plan);
 	std::reverse(p5.begin(), p5.end());
 
-	printf("IND path1 ...\n");
-	for (int i=0;i<p1.size();i++)
-		printf("%s \n",p1[i].to_str().c_str());
-	printf("IND path2 ...\n");
-	for (int i=0;i<p2.size();i++)
-		printf("%s \n",p2[i].to_str().c_str());
-	printf("IND path1_end...\n");
-	for (int i=0;i<p3.size();i++)
-		printf("%s \n",p3[i].to_str().c_str());
-	printf("IND path2_end...\n");
-	for (int i=0;i<p4.size();i++)
-		printf("%s \n",p4[i].to_str().c_str());
-	printf("Coupled mid path...\n");
-	for (int i=0;i<p5.size();i++)
-		printf("%s \n",p5[i].to_str().c_str());
+	// printf("IND path1 ...\n");
+	// for (int i=0;i<p1.size();i++)
+	// 	printf("%s \n",p1[i].to_str().c_str());
+	// printf("IND path2 ...\n");
+	// for (int i=0;i<p2.size();i++)
+	// 	printf("%s \n",p2[i].to_str().c_str());
+	// printf("IND path1_end...\n");
+	// for (int i=0;i<p3.size();i++)
+	// 	printf("%s \n",p3[i].to_str().c_str());
+	// printf("IND path2_end...\n");
+	// for (int i=0;i<p4.size();i++)
+	// 	printf("%s \n",p4[i].to_str().c_str());
+	// printf("Coupled mid path...\n");
+	// for (int i=0;i<p5.size();i++)
+	// 	printf("%s \n",p5[i].to_str().c_str());
 
 	// printf("Merged INDV PATHS1...\n");
 	//MERGE INDV PATHS
-	int max1 = std::max(p1.size(), p2.size());
+	int min1 = std::min(p1.size(), p2.size());
 	vector<State> pp1 = {};
-	for (int i=0;i<max1;i++)
+	for (int i=0;i<min1;i++)
 		pp1.push_back(*State::combine_states({&(p1[i]),&(p2[i])}));
+	if (p1.size()>p2.size()){
+		for (int i=min1;i<min1+p1.size()-p2.size();i++)
+			pp1.push_back(*State::combine_states({&(p1[i]),&(p2.back())}));
+	}
+	else{
+		for (int i=min1;i<min1+p2.size()-p1.size();i++)
+			pp1.push_back(*State::combine_states({&(p1.back()),&(p2[i])}));
+	}
 
-	// for (int i=0;i<pp1.size();i++)
-	// 	printf("%s \n",pp1[i].to_str().c_str());
+	for (int i=0;i<pp1.size();i++)
+		printf("%s \n",pp1[i].to_str().c_str());
 
 	// printf("Merged INDV PATHS2...\n");
 	//MERGE INDV PATHS
@@ -323,86 +489,23 @@ vector<State> Search::mergePlans(Search* s1, Search* s2, Search* sc, clashInfo c
 	return pp1;
 }
 
-// vector<State> mergePlans(Search s1, Search s2, Search sc){
-// 	//ASSUMES 2 PATHS
-// 	//TIE ALL THE RESULTING PATHS
-// 	printf("Displaying Final Path...\n");
-// 	printf("%d %d %d %d",s1->plan.begin(),s1->plan.begin(),c.t_start,c.t_end);
-// 	vector<State> p1(s1->plan.begin() + c.t_start, s1->plan.end()); 
-// 	std::reverse(p1.begin(), p1.end());
-// 	vector<State> p2(s2->plan.begin() + c.t_start, s2->plan.end()); 	
-// 	std::reverse(p2.begin(), p2.end());
-// 	vector<State> p3(s1->plan.end() - c.t_end, s1->plan.end());
-// 	std::reverse(p3.begin(), p3.end()); 
-// 	vector<State> p4(s2->plan.end() - c.t_end, s2->plan.end()); 
-// 	std::reverse(p4.begin(), p4.end());
-// 	vector<State> p5(sc->plan);
-// 	std::reverse(p5.begin(), p5.end());
-
-// 	printf("IND path1 ...\n");
-// 	for (int i=0;i<p1.size();i++)
-// 		printf("%s \n",p1[i].to_str().c_str());
-// 	printf("IND path2 ...\n");
-// 	for (int i=0;i<p2.size();i++)
-// 		printf("%s \n",p2[i].to_str().c_str());
-// 	printf("IND path1_end...\n");
-// 	for (int i=0;i<p3.size();i++)
-// 		printf("%s \n",p3[i].to_str().c_str());
-// 	printf("IND path2_end...\n");
-// 	for (int i=0;i<p4.size();i++)
-// 		printf("%s \n",p4[i].to_str().c_str());
-// 	printf("Coupled mid path...\n");
-// 	for (int i=0;i<p5.size();i++)
-// 		printf("%s \n",p5[i].to_str().c_str());
-
-// 	printf("Merged INDV PATHS1...\n");
-// 	//MERGE INDV PATHS
-// 	int max1 = std::max(p1.size(), p2.size());
-// 	vector<State> pp1 = {};
-// 	for (int i=0;i<max1;i++)
-// 		pp1.push_back(*State::combine_states({&(p1[i]),&(p2[i])}));
-
-// 	for (int i=0;i<pp1.size();i++)
-// 		printf("%s \n",pp1[i].to_str().c_str());
-
-// 	printf("Merged INDV PATHS2...\n");
-// 	//MERGE INDV PATHS
-// 	int max2 = std::max(p3.size(), p4.size());
-// 	vector<State> pp2 = {};
-// 	for (int i=0;i<max2;i++)
-// 		pp1.push_back(*State::combine_states({&(p3[i]),&(p4[i])}));
-
-// 	for (int i=0;i<pp2.size();i++)
-// 		printf("%s \n",pp2[i].to_str().c_str());
-
-// 	//ACTUAL MERGING
-// 	//pp1+p5+pp2
-// 	pp1.insert(pp1.end(), p5.begin(), p5.end()); 
-// 	pp1.insert(pp1.end(), pp2.begin(), pp2.end()); 
-// 	printf("FINAL PATH...\n");
-// 	for (int i=0;i<pp1.size();i++)
-// 		printf("%s \n",pp1[i].to_str().c_str());
-
-// 	std::reverse(pp1.begin(), pp1.end());
-// 	Search::print_plan(pp1);
-// }
-
 // Get a start & goal state, divide into subsearches and return results
 bool Search::checkReducedSolution(State* cur){
+
 	State *st1 = new State({cur->boxes[0]},{cur->robots[0]});
 	State *st2 = new State({cur->boxes[1]},{cur->robots[1]});
 	State *go1 = new State();
 	State *go2 = new State();
 
-	go1->boxes.push_back(goal->boxes[0]);
-	go2->boxes.push_back(goal->boxes[1]);
-	if (checkRobots){
-		go1->robots.push_back(goal->robots[0]);
-		go2->robots.push_back(goal->robots[1]);
-	}
-
+	go1->boxes.push_back(reducedGoal->boxes[0]);
+	go2->boxes.push_back(reducedGoal->boxes[1]);
+	// if (checkRobots){
+	// 	go1->robots.push_back(reducedGoal->robots[0]);
+	// 	go2->robots.push_back(reducedGoal->robots[1]);
+	// }
 	Search *s1 = new Search(st1, go1);
 	copySearchParameters(s1);
+	s1->checkRobots = false;
 	// s1.max_iterations = max_iterations;
 	// s1.time_lim_secs = time_lim_secs;
 	// s1.epsilon = epsilon;
@@ -411,6 +514,7 @@ bool Search::checkReducedSolution(State* cur){
 
 	Search *s2 = new Search(st2, go2);
 	copySearchParameters(s2);
+	s2->checkRobots = false;
 	// s2.max_iterations = max_iterations;
 	// s2.time_lim_secs = time_lim_secs;
 	// s2.epsilon = epsilon;
@@ -420,12 +524,16 @@ bool Search::checkReducedSolution(State* cur){
 	bool result = Search::paths_free({s1->plan,s2->plan});
 	if (result){
 		printf("INDV SOLUTIONS: ======================");
+		aux_plan_vec = {};
+		aux_plan_vec.push_back(s1->plan);
+		aux_plan_vec.push_back(s2->plan);
 		s1->print_plan();
 		s2->print_plan();
 	}	
 	// printf(result ? "FREE!-----------\n":"...\n");
 	return result;
 }
+
 
 bool Search::paths_free(vector<vector<State>> plans){
 	for(int i=0; i<plans.size(); i++){

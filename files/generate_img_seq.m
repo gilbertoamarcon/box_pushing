@@ -114,6 +114,7 @@ for s=1:num_steps
 
     axis equal;
     axis tight;
+    axis off;
     
     % Saving to file
     filename = sprintf(FIG_PATTERN,FIG_PREFIX,s);

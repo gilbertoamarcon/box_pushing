@@ -140,7 +140,6 @@ void Map::set_Deadlocks(vector<Pos> goals){
 	//Print all deadlocks
 	// for (int i=0;i<deadlocks.size();i++)
 	// 	printf("%d %d \n", deadlocks[i].i, deadlocks[i].j);
-
 }
 
 
