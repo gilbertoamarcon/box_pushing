@@ -47,14 +47,13 @@ int main(int argc, char **argv){
 		Search::store_plan(plan_file);
 
 	// Presenting results on screen
+	printf("Plan found. Problem number %d; ",problem_number);
+	printf("%d expanded nodes; ",Search::num_exp_nodes);
+	printf("%d actions; ",Search::plan.size());
+	printf("%f seconds.\n",Search::planning_time);
 	if(!verbose) return result;
-	if(Search::num_exp_nodes > 0){
-			printf("Plan found.\n");
-			printf("%d expanded nodes.\n",Search::num_exp_nodes);
-			printf("%d actions.\n",Search::plan.size());
-			printf("%f seconds.\n",Search::planning_time);
+	if(Search::num_exp_nodes > 0)
 			Search::print_plan();
-	}
 	else
 		printf("Plan failed.\n");
 
