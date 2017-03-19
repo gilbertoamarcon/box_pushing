@@ -47,7 +47,7 @@ int main(int argc, char **argv){
 		Search::store_plan(plan_file);
 
 	// Presenting results on screen
-	printf("Plan found. Problem number %d; ",problem_number);
+	printf("Problem number %d; ",problem_number);
 	printf("%d expanded nodes; ",Search::num_exp_nodes);
 	printf("%d actions; ",Search::plan.size());
 	printf("%f seconds.\n",Search::planning_time);

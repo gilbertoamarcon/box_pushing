@@ -1,4 +1,4 @@
-for i in {24..32}
+for i in 31 4 18 32 29 {20..23}
 do
 	./bin/main $i $1
 done
